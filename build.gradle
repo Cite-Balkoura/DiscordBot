@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+mainClassName = 'fr.milekat.DiscordBot.Main'
+
+shadowJar{
+    getArchiveClassifier().set(null)
+    minimize()
+}
+
+repositories {
+    maven { url = 'https://m2.dv8tion.net/releases' }
+    mavenCentral()
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+dependencies {
+    implementation (group: 'net.dv8tion', name:'JDA', version:'4.2.1_276') { exclude module: "opus-java" }
+    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    //implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+}
