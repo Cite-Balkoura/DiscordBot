@@ -1,8 +1,14 @@
 package fr.milekat.DiscordBot.bot.master.classes;
 
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
+
 import java.util.ArrayList;
 
+@Entity(value = "step")
 public class Step {
+    @Indexed(options = @IndexOptions(unique = true))
     private final String name;
     private final String type;
     private final String message;

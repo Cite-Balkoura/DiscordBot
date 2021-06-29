@@ -15,9 +15,9 @@ public class Console {
                 } else if (input.equalsIgnoreCase("stop")) {
                     stopSequence();
                 } else if (input.equalsIgnoreCase("reload messages")) {
-                    Main.getBot().reloadMsg();
+                    Main.getBotManager().reloadMsg();
                 } else if (input.equalsIgnoreCase("reload channel")) {
-                    Main.getBot().reloadCh();
+                    Main.getBotManager().reloadCh();
                 } else if (input.equalsIgnoreCase("debug")) {
                     debug();
                 } else if (input.equalsIgnoreCase("devmode")) {

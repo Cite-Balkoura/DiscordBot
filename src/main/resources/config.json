@@ -1,0 +1,25 @@
+{
+  "bot token": "",
+  "data": {
+    "mongo": {
+      "host" : "127.0.0.1",
+      "port" : 27017,
+      "user" : "minecraft",
+      "db" : "admin",
+      "databases" : ["master"]
+    }
+  },
+  "discord" : {
+    "id" : {
+      "gPublic" : 0,
+      "cGeneral" : 0,
+      "cEvent" : 0
+    },
+    "msg" : {
+      "cantMp" : "Hey @mention, I can't dm you",
+      "joinEvent" : "Thank to join the event <EVENT_NAME>",
+      "joinEventDescription" : "Event description: ",
+      "joinEventDate" : "This event will start on <START_DATE> and finish on <END_DATE>"
+    }
+  }
+}

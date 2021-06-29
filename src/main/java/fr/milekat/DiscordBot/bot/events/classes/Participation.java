@@ -1,21 +1,28 @@
 package fr.milekat.DiscordBot.bot.events.classes;
 
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Reference;
+
 import java.util.UUID;
 
+@Entity(value = "participation")
 public class Participation {
+    @Indexed
     private final UUID uuid;
-    private final String eventName;
+    @Reference(idOnly = true)
+    private final Event event;
 
-    public Participation(UUID uuid, String eventName) {
+    public Participation(UUID uuid, Event event) {
         this.uuid = uuid;
-        this.eventName = eventName;
+        this.event = event;
     }
 
     public UUID getUuid() {
         return uuid;
     }
 
-    public String getEventName() {
-        return eventName;
+    public Event getEvent() {
+        return event;
     }
 }

@@ -1,5 +1,6 @@
 package fr.milekat.DiscordBot;
 
+import dev.morphia.Datastore;
 import fr.milekat.DiscordBot.bot.BotManager;
 import fr.milekat.DiscordBot.core.Init;
 import fr.milekat.DiscordBot.utils.DateMileKat;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import org.json.simple.JSONObject;
 
 import java.sql.Connection;
+import java.util.HashMap;
 
 public class Main {
     /* Core */
@@ -18,16 +20,13 @@ public class Main {
     private static JSONObject configs;
     /* SQL */
     private static MariaManage mariaManage;
+    /* MongoDB */
+    private static HashMap<String, Datastore> datastoreMap;
     /* Jedis */
     public static boolean DEBUG_JEDIS = true;
     /* Discord Bot */
     private static JDA jda;
     private static BotManager bot;
-    /* Dates */
-    //public static Date DATE_MAINTENANCE = new Date();
-    //public static Date DATE_MAINTENANCE_OFF = new Date();
-    //public static Date DATE_OPEN = new Date();
-    //public static Date DATE_BAN = new Date();
 
     /**
      * Main method
@@ -36,15 +35,16 @@ public class Main {
         logs = new WriteLog();
         log("Starting application..");
         Init init = new Init();
+        //  Console load
+        init.getConsole().start();
         configs = init.getConfigs();
         //  Load SQL + Launch ping + DATES
         mariaManage = init.setSQL();
-        init.loadDates();
+        //  Load Mongo
+        datastoreMap = init.getDatastoreMap();
         //  Discord bot load
         jda = init.getJDA();
         bot = new BotManager();
-        //  Console load
-        init.getConsole().start();
         //  Log
         if (DEBUG_ERROR) log("Debugs enable");
         if (MODE_DEV) log("Mode dev enable");
@@ -76,6 +76,13 @@ public class Main {
     }
 
     /**
+     * MongoDB Connection (Morphia Datastore) to query
+     */
+    public static Datastore getDatastore(String dbName) {
+        return datastoreMap.get(dbName);
+    }
+
+    /**
      * Discord BOT
      */
     public static JDA getJda() {
@@ -85,7 +92,7 @@ public class Main {
     /**
      * BOT Manager
      */
-    public static BotManager getBot() {
+    public static BotManager getBotManager() {
         return bot;
     }
 }

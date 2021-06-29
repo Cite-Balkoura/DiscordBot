@@ -1,10 +1,9 @@
-package fr.milekat.DiscordBot.bot.Utils;
+package fr.milekat.DiscordBot.bot;
 
 import fr.milekat.DiscordBot.Main;
-import fr.milekat.DiscordBot.bot.BotManager;
 import net.dv8tion.jda.api.entities.*;
 
-public class BaseUtils {
+public class BotUtils {
     /**
      * Replace "@mention" with mentioned user
      */
@@ -24,7 +23,7 @@ public class BaseUtils {
      * Method to send an embed in channel with ✅/❌
      */
     public static void sendEmbed(MessageChannel channel, MessageEmbed embed) {
-        channel.sendMessage(embed).queue(message ->
+        channel.sendMessageEmbeds(embed).queue(message ->
                 message.addReaction("✅").queue(reaction ->
                         message.addReaction("❌").queue()));
     }
@@ -34,7 +33,7 @@ public class BaseUtils {
      */
     public static void sendPrivate(User user, MessageEmbed embed) {
         user.openPrivateChannel().queue(privateChannel ->
-                        privateChannel.sendMessage(embed).queue(message ->
+                        privateChannel.sendMessageEmbeds(embed).queue(message ->
                                 message.addReaction("✅").queue(reaction ->
                                         message.addReaction("❌").queue())),
                 throwable -> cantSendPrivate(user)
@@ -55,7 +54,7 @@ public class BaseUtils {
      * If the bot got an issue when sending a private message to a User
      */
     private static void cantSendPrivate(User user) {
-        TextChannel channel = Main.getJda().getTextChannelById((long) BotManager.id.get(""));
-        if (channel!=null) channel.sendMessage(setNick(user, (String) BotManager.msg.get("cant_mp"))).queue();
+        TextChannel channel = Main.getJda().getTextChannelById((long) BotManager.getID().get("cGeneral"));
+        if (channel!=null) channel.sendMessage(setNick(user, (String) BotManager.getMSG().get("cantMp"))).queue();
     }
 }

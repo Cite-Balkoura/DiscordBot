@@ -9,22 +9,17 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class BotManager {
-    public static JSONObject id;
-    public static JSONObject msg;
+    private static JSONObject ID;
+    private static JSONObject MSG;
 
     public BotManager() {
-        id = (JSONObject) Main.getConfig().get("id");
-        msg = (JSONObject) Main.getConfig().get("messages");
+        ID = (JSONObject) Main.getConfig().get("id");
+        MSG = (JSONObject) Main.getConfig().get("messages");
         /*
         //  Event
-        api.addEventListener(new DebugEvent(api, id));
-        api.addEventListener(new RegisterEvent(this, api, id, msg));
-        api.addEventListener(new TeamEvent(this, api, id, msg));
-        api.addEventListener(new McChat(api, id));
-        //api.addEventListener(new Chat(this, api, id, msg));
-        //api.addEventListener(new Ban(this, api, id, msg));
+        api.addEventListener(new EventClass...);
          */
-        if (Main.DEBUG_ERROR) Main.log("Load du bot terminé.");
+        if (Main.DEBUG_ERROR) Main.log("Bot loaded.");
     }
 
     /**
@@ -33,8 +28,7 @@ public class BotManager {
     public void reloadMsg() {
         try {
             JSONParser jsonParser = new JSONParser();
-            FileReader config = new FileReader("config.json");
-            msg = (JSONObject) ((JSONObject) jsonParser.parse(config)).get("msg");
+            MSG = (JSONObject) ((JSONObject)((JSONObject) jsonParser.parse(new FileReader("config.json"))).get("discord")).get("msg");
         } catch (IOException | ParseException exception) {
             Main.log("config.json not found");
             if (Main.DEBUG_ERROR) exception.printStackTrace();
@@ -47,10 +41,24 @@ public class BotManager {
     public void reloadCh() {
         try {
             JSONParser jsonParser = new JSONParser();
-            id = (JSONObject) ((JSONObject) jsonParser.parse(new FileReader("config.json"))).get("id");
+            ID = (JSONObject) ((JSONObject)((JSONObject) jsonParser.parse(new FileReader("config.json"))).get("discord")).get("id");
         } catch (IOException | ParseException exception) {
             Main.log("config.json not found");
             if (Main.DEBUG_ERROR) exception.printStackTrace();
         }
+    }
+
+    /**
+     * Shortcut to get messages from config section
+     */
+    public static JSONObject getMSG() {
+        return MSG;
+    }
+
+    /**
+     * Shortcut to get ids from config section
+     */
+    public static JSONObject getID() {
+        return ID;
     }
 }

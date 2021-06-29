@@ -1,5 +1,8 @@
 package fr.milekat.DiscordBot.bot.master.classes;
 
+import dev.morphia.annotations.Entity;
+
+@Entity(value = "stepInput")
 public class StepInput {
     private final String name;
     private final String answer;

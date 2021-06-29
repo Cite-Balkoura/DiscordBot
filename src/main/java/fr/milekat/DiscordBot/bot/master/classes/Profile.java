@@ -1,14 +1,21 @@
 package fr.milekat.DiscordBot.bot.master.classes;
 
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
 import fr.milekat.DiscordBot.bot.events.classes.Participation;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+@Entity(value = "profile")
 public class Profile {
+    @Indexed(options = @IndexOptions(unique = true))
     private final String name;
+    @Indexed(options = @IndexOptions(unique = true))
     private final UUID uuid;
+    @Indexed(options = @IndexOptions(unique = true))
     private final long discordId;
     private final Date registerDate;
     private final ArrayList<StepInput> registerForm;
