@@ -8,39 +8,61 @@ import fr.milekat.discordbot.bot.events.classes.Participation;
 import fr.milekat.discordbot.bot.events.classes.ParticipationManager;
 import fr.milekat.discordbot.bot.master.classes.Profile;
 import fr.milekat.discordbot.bot.master.classes.ProfileManager;
-import fr.milekat.discordbot.utils.DateMileKat;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 
 public class JoinEvent extends ListenerAdapter {
-    public void onGuildMemberJoin(MessageReactionAddEvent event) {
-        if (!event.getReaction().getReactionEmote().getName().equalsIgnoreCase(":white_check_mark:")) return;
-        if (!event.getChannel().equals(Main.getJDA().getTextChannelById((long) BotManager.getID().get("cEvent")))) return;
-        event.retrieveUser().queue(user -> event.retrieveMessage().queue(message -> event.retrieveMember().queue(member -> addPlayerEventReg(member, user, message))));
+    private final String JOIN_EVENT = "Join Event";
+
+    /**
+     * When a member of guild click on "Join Event" from a message in Event channel (to join an event)
+     */
+    @Override
+    public void onButtonClick(ButtonClickEvent event) {
+        if (!event.getChannel().equals(BotManager.getChannel("cEvent"))) return;
+        if (event.getButton()==null || !event.getButton().getLabel().equalsIgnoreCase(JOIN_EVENT)) return;
+        addPlayerEventReg(event.getMember(), event.getUser(), event.getMessage());
     }
 
-    public void addPlayerEventReg(Member member, User user, Message message) {
+    /**
+     * Add button on new message in Event channel
+     */
+    @Override
+    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+        if (!event.getChannel().equals(BotManager.getChannel("cEvent"))) return;
+        if (event.getMessage().getEmbeds().isEmpty() || event.getMessage().getEmbeds().get(0).getTitle()==null) return;
+        event.getMessage().getButtons().add(Button.primary(event.getMessage().getEmbeds().get(0).getTitle(), JOIN_EVENT).withStyle(ButtonStyle.PRIMARY));
+    }
+
+    /**
+     * Register the player to the event (If member is not banned)
+     */
+    private void addPlayerEventReg(Member member, User user, Message message) {
         if (user.isBot() || message.getEmbeds().isEmpty()) return;
         //  Prevent a banned player to register to an event if he is currently banned
-        if (member.getRoles().contains(Main.getJDA().getRoleById((long) BotManager.getID().get("rBan")))) return;
-        Profile profile = ProfileManager.getProfile(user.getIdLong());
+        if (member.getRoles().contains(BotManager.getRole("rBan"))) return;
         Event event = EventManager.getEvent(message.getEmbeds().get(0).getTitle());
+        //  Check if member is already on this Event
+        if (member.getRoles().contains(Main.getJDA().getRoleById(event.getRoleId()))) return;
+        Profile profile = ProfileManager.getProfile(user.getIdLong());
+        if (profile == null) {
+            Main.log("[ERROR] Can't find member profile in Event channel.");
+            return;
+        }
         //  Save his participation to the event
         ParticipationManager.save(new Participation(profile.getUuid(), event));
-        user.openPrivateChannel().queue(privateChannel -> {
-            // TODO: 29/06/2021 Find a way to put this method into an util class (To be more generic)
+        /*user.openPrivateChannel().queue(privateChannel -> {
             privateChannel.sendMessage(BotManager.getMSG().get("joinEvent").toString().replaceAll("<EVENT_NAME>", event.getName())).queue();
             privateChannel.sendMessage(BotManager.getMSG().get("joinEventDescription") + event.getDescription()).queue();
             privateChannel.sendMessage(BotManager.getMSG().get("joinEventDate").toString().replaceAll("<START_DATE>", DateMileKat.getDate(event.getStartDate())).replaceAll("<END_DATE>", DateMileKat.getDate(event.getEndDate()))).queue();
-            // TODO: 29/06/2021 Send messages for event features (Ex. Team feature, tell to user how to create and join a team for this event)
-            /*
-            if (event.getFeatures().contains(TEAM)) {
-
+            if (event.getFeatures().stream().anyMatch(eventFeature -> eventFeature.getName().equalsIgnoreCase("Team"))) {
             }
-            */
-        });
+        });*/// TODO: 30/06/2021 Keep this things ?
     }
 }

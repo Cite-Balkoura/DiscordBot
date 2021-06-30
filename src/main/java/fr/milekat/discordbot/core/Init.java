@@ -99,7 +99,8 @@ public class Init {
         Datastore datastore = Morphia.createDatastore(MongoClients.create(settings), dbName, MapperOptions.builder()
                 .enablePolymorphicQueries(true)
                 .build());
-        datastore.getMapper().mapPackage("");
+        datastore.getMapper().mapPackage("fr.milekat.discordbot.bot.events.classes");
+        datastore.getMapper().mapPackage("fr.milekat.discordbot.bot.master.classes");
         datastore.ensureIndexes();
         datastore.ensureCaps();
         datastore.enableDocumentValidation();

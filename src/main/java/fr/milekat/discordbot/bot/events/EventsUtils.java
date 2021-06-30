@@ -1,5 +1,4 @@
 package fr.milekat.discordbot.bot.events;
 
-public class EventManager {
-
+public class EventsUtils {
 }

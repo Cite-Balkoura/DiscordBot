@@ -1,6 +1,5 @@
 package fr.milekat.discordbot.bot;
 
-import fr.milekat.discordbot.Main;
 import net.dv8tion.jda.api.entities.*;
 
 public class BotUtils {
@@ -54,7 +53,7 @@ public class BotUtils {
      * If the bot got an issue when sending a private message to a User
      */
     private static void cantSendPrivate(User user) {
-        TextChannel channel = Main.getJDA().getTextChannelById((long) BotManager.getID().get("cGeneral"));
-        if (channel!=null) channel.sendMessage(setNick(user, (String) BotManager.getMSG().get("cantMp"))).queue();
+        TextChannel channel = BotManager.getChannel("cGeneral");
+        if (channel!=null) channel.sendMessage(setNick(user, BotManager.getMsg("cantMp"))).queue();
     }
 }
