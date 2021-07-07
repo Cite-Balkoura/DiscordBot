@@ -1,16 +1,32 @@
 {
-  "bot token": "",
+  "config": {
+    "debugError" : false,
+    "debugRabbitMQ" : false,
+    "devMode" : false
+  },
   "data": {
     "mongo": {
       "host" : "127.0.0.1",
       "port" : 27017,
       "user" : "minecraft",
+      "password" : "admin",
       "db" : "admin",
       "databases" : ["master"]
+    },
+    "rabbitMQ": {
+      "host" : "127.0.0.1",
+      "port" : 5672,
+      "user" : "minecraft",
+      "password" : "admin",
+      "exchange" : "minecraft",
+      "queue" : "sub-queue",
+      "routingKey" : "pub-routingKey"
     }
   },
-  "discord" : {
-    "id" : {
+  "discord": {
+    "botToken": "TOKEN HERE",
+    "botGame": "Custom game here :)",
+    "id": {
       "gPublic" : 0,
       "ccRegister" : 0,
       "cGeneral" : 0,
@@ -19,14 +35,14 @@
       "rProfile" : 0,
       "rWaiting" : 0
     },
-    "msg" : {
+    "msg": {
       "cantMp" : "Hey @mention, I can't dm you",
       "joinEvent": {
         "joinEvent" : "Thank to join the event <EVENT_NAME>",
         "joinEventDescription" : "Event description: ",
         "joinEventDate" : "This event will start on <START_DATE> and finish on <END_DATE>"
       },
-      "profileReg" : {
+      "profileReg": {
         "buttonFrom" : "I accept rules, sign in"
       }
     }

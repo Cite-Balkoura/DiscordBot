@@ -1,7 +1,5 @@
 package fr.milekat.discordbot.utils;
 
-import fr.milekat.discordbot.Main;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,9 +11,13 @@ public class WriteLog {
     public WriteLog() throws IOException {
         File file = new File("logs.txt");
         if (!file.createNewFile()) {
+            File logDirectory = new File("logs/");
+            if (logDirectory.mkdir()) {
+                System.out.println("logs directory created.");
+            }
             Files.move(Paths.get("logs.txt"), Paths.get("logs/logs_" + DateMileKat.setDateSysNow() + ".txt"));
             boolean success = file.createNewFile();
-            if (success) Main.log("New log file create: " + file.getName());
+            if (success) System.out.println("New log file create: " + file.getName());
         }
     }
 

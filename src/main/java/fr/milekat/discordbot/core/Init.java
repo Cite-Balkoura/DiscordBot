@@ -8,7 +8,6 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.utils.MariaManage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -23,10 +22,8 @@ import org.json.simple.parser.ParseException;
 import javax.security.auth.login.LoginException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class Init {
     /**
@@ -35,51 +32,22 @@ public class Init {
     public JSONObject getConfigs() throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject configs = (JSONObject) jsonParser.parse(new FileReader("config.json"));
-        Main.DEBUG_ERROR = (boolean) configs.get("debug");
-        Main.DEBUG_JEDIS = (boolean) configs.get("debugjedis");
-        Main.MODE_DEV = (boolean) configs.get("devmode");
+        Main.DEBUG_ERROR = (boolean) ((JSONObject) configs.get("config")).get("debugError");
+        Main.DEBUG_RABBIT = (boolean) ((JSONObject) configs.get("config")).get("debugRabbitMQ");
+        Main.MODE_DEV = (boolean) ((JSONObject) configs.get("config")).get("devMode");
         return configs;
     }
 
     /**
-     * SQL connection + SQL auto ping to prevent the connection to get disconnected
+     * Load DataStores
      */
-    public MariaManage setSQL() {
-        JSONObject sqlConfig = (JSONObject) Main.getConfig().get("sql");
-        //  Open SQL connection
-        MariaManage mariaManage = new MariaManage("jdbc:mysql://",
-                (String) sqlConfig.get("host"),
-                (String) sqlConfig.get("db"),
-                (String) sqlConfig.get("user"),
-                (String) sqlConfig.get("mdp"));
-        mariaManage.connection();
-        //  Start SQL ping to keep alive SQL connection
-        new Thread("SQL-keepalive") {
-            @Override
-            public void run() {
-                Timer SQL_keepalive = new Timer();
-                SQL_keepalive.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        try {
-                            PreparedStatement q = mariaManage.getConnection().prepareStatement("SELECT * FROM `ping`;");
-                            q.execute();
-                            q.close();
-                        } catch (SQLException exception) {
-                            exception.printStackTrace();
-                        }
-                    }
-                }, 0, 600000);
-            }
-        }.start();
-        return mariaManage;
-    }
-
     public HashMap<String, Datastore> getDatastoreMap() {
         HashMap<String, Datastore> datastoreMap = new HashMap<>();
         for (Object dbName : ((JSONArray) ((JSONObject) ((JSONObject) Main.getConfig().get("data")).get("mongo")).get("databases"))) {
+            if (Main.DEBUG_ERROR) Main.log("Load db: " + dbName.toString());
             datastoreMap.put(dbName.toString(), setDatastore(dbName.toString()));
         }
+        if (Main.DEBUG_ERROR) Main.log("[Mongo] " + datastoreMap.size() + " db loaded");
         return datastoreMap;
     }
 
@@ -91,10 +59,10 @@ public class Init {
         MongoCredential credential = MongoCredential.createCredential(
                 (String) mongoConfig.get("user"),
                 (String) mongoConfig.get("db"),
-                ((String) mongoConfig.get("mdp")).toCharArray());
+                ((String) mongoConfig.get("password")).toCharArray());
         MongoClientSettings settings = MongoClientSettings.builder()
+                .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(new ServerAddress((String) mongoConfig.get("host"), ((Long) mongoConfig.get("port")).intValue()))))
                 .credential(credential)
-                .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(new ServerAddress())))
                 .build();
         Datastore datastore = Morphia.createDatastore(MongoClients.create(settings), dbName, MapperOptions.builder()
                 .enablePolymorphicQueries(true)
@@ -123,29 +91,12 @@ public class Init {
      * Connect to the Discord bot and set the watching text
      */
     public JDA getJDA() throws LoginException, InterruptedException {
-        JDA api = JDABuilder.createDefault((String) Main.getConfig().get("bot token"),
+        JDA api = JDABuilder.createDefault((String) ((JSONObject) Main.getConfig().get("discord")).get("botToken"),
                 GatewayIntent.GUILD_MEMBERS,
                 GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.GUILD_MESSAGE_REACTIONS).disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE).build().awaitReady();
-        api.getPresence().setPresence(OnlineStatus.ONLINE, Activity.watching((String) Main.getConfig().get("bot_game")));
+                GatewayIntent.GUILD_MESSAGE_REACTIONS)
+                .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE).build().awaitReady();
+        api.getPresence().setPresence(OnlineStatus.ONLINE, Activity.watching((String) ((JSONObject) Main.getConfig().get("discord")).get("botGame")));
         return api;
-    }
-
-    /**
-     * Get all channels to subscribe with SQL list
-     */
-    private String[] getJedisChannels() {
-        try {
-            Connection connection = Main.getSql();
-            PreparedStatement q = connection.prepareStatement("SELECT * FROM `mcpg_redis_channels`");
-            q.execute();
-            ArrayList<String> jedisChannels = new ArrayList<>();
-            while (q.getResultSet().next()) { jedisChannels.add(q.getResultSet().getString("channel")); }
-            q.close();
-            return jedisChannels.toArray(new String[0]);
-        } catch (SQLException throwable) {
-            throwable.printStackTrace();
-        }
-        return null;
     }
 }

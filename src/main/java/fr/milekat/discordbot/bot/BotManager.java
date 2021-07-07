@@ -21,9 +21,9 @@ public class BotManager {
     public BotManager() {
         ID = (JSONObject) Main.getConfig().get("id");
         MSG = (JSONObject) Main.getConfig().get("messages");
-        new EventsManager();
         new MasterManager();
-        if (Main.DEBUG_ERROR) Main.log("Bot loaded.");
+        new EventsManager();
+        if (Main.DEBUG_ERROR) Main.log("Bot loaded");
     }
 
     /**
