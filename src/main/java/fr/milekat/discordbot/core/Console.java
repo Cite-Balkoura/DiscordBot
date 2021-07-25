@@ -14,16 +14,14 @@ public class Console {
                     sendHelp();
                 } else if (input.equalsIgnoreCase("stop")) {
                     stopSequence();
-                } else if (input.equalsIgnoreCase("reload messages")) {
-                    Main.getBotManager().reloadMsg();
-                } else if (input.equalsIgnoreCase("reload channel")) {
-                    Main.getBotManager().reloadCh();
+                } else if (input.equalsIgnoreCase("reload")) {
+                    Main.getBotManager().reloadConfig();
                 } else if (input.equalsIgnoreCase("debug")) {
                     debug();
                 } else if (input.equalsIgnoreCase("devmode")) {
                     devmode();
                 } else {
-                    Main.log("Commande inconnue");
+                    Main.log("Unknown command");
                     sendHelp();
                 }
             }
@@ -31,21 +29,20 @@ public class Console {
     }
 
     /**
-     * Liste des commandes dispo pour la console du bot
+     * Console help display
      */
     private void sendHelp() {
-        Main.log("help: Envoi ce message.");
-        Main.log("reload messages: Update les messages du bot.");
-        Main.log("reload channel: Update les id de channels pour le bot.");
-        Main.log("debug: Active/Désactive le débug.");
-        Main.log("stop: Stop le bot !");
+        Main.log("help: Show this message.");
+        Main.log("reload: Reload configs.");
+        Main.log("debug: Enable/Disable debug mode.");
+        Main.log("stop: Stop bot !");
     }
 
     /**
      * Disconnect the bot
      */
     private void stopSequence() {
-        Main.log("Déconnexion du bot...");
+        Main.log("Disconnecting bot...");
         Main.getJDA().getPresence().setStatus(OnlineStatus.OFFLINE);
         Main.log("Good bye!");
         System.exit(0);

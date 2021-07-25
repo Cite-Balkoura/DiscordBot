@@ -15,37 +15,21 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class BotManager {
-    private static JSONObject ID;
-    private static JSONObject MSG;
+    private static JSONObject CONFIG;
 
     public BotManager() {
-        ID = (JSONObject) Main.getConfig().get("id");
-        MSG = (JSONObject) Main.getConfig().get("messages");
+        reloadConfig();
         new MasterManager();
         new EventsManager();
         if (Main.DEBUG_ERROR) Main.log("Bot loaded");
     }
 
     /**
-     * Reload bot messages from config.json
+     * Reload config.json file
      */
-    public void reloadMsg() {
+    public void reloadConfig() {
         try {
-            JSONParser jsonParser = new JSONParser();
-            MSG = (JSONObject) ((JSONObject)((JSONObject) jsonParser.parse(new FileReader("config.json"))).get("discord")).get("msg");
-        } catch (IOException | ParseException exception) {
-            Main.log("config.json not found");
-            if (Main.DEBUG_ERROR) exception.printStackTrace();
-        }
-    }
-
-    /**
-     * Reload bot channels id from config.json
-     */
-    public void reloadCh() {
-        try {
-            JSONParser jsonParser = new JSONParser();
-            ID = (JSONObject) ((JSONObject)((JSONObject) jsonParser.parse(new FileReader("config.json"))).get("discord")).get("id");
+            CONFIG = ((JSONObject) new JSONParser().parse(new FileReader("config.json")));
         } catch (IOException | ParseException exception) {
             Main.log("config.json not found");
             if (Main.DEBUG_ERROR) exception.printStackTrace();
@@ -56,46 +40,52 @@ public class BotManager {
      * Shortcut to get Message from a config section
      */
     public static String getMsg(String path) {
-        return (String) getNodeValue(MSG, path);
+        return getNodeValue(CONFIG, "discord.msg." + path);
     }
 
     /**
      * Shortcut to get Guild from config section
      */
     public static Guild getGuild() {
-        return Main.getJDA().getGuildById((long) getNodeValue(ID, "gPublic"));
+        return Main.getJDA().getGuildById(getId("gPublic"));
     }
 
     /**
      * Shortcut to get Category from a config section
      */
     public static Category getCategory(String path) {
-        return Main.getJDA().getCategoryById((long) getNodeValue(ID, path));
+        return Main.getJDA().getCategoryById(getId(path));
     }
 
     /**
      * Shortcut to get TextChannel from a config section
      */
     public static TextChannel getChannel(String path) {
-        return Main.getJDA().getTextChannelById((long) getNodeValue(ID, path));
+        return Main.getJDA().getTextChannelById(getId(path));
     }
 
     /**
      * Shortcut to get TextChannel from a config section
      */
     public static Role getRole(String path) {
-        return Main.getJDA().getRoleById((long) getNodeValue(ID, path));
+        return Main.getJDA().getRoleById(getId(path));
     }
 
     /**
-     * Return the value of node (As object)
+     * Get discord id from config.json file
      */
-    private static Object getNodeValue(JSONObject type, String path) {
-        JSONObject jsonObject = type;
-        String loop = path.substring(path.lastIndexOf('.'));
-        for (String node : loop.split("\\.")) {
+    private static Long getId(String config) {
+        return Long.parseLong(getNodeValue(CONFIG, "discord.id." + config));
+    }
+
+    /**
+     * Return the value of node
+     */
+    private static String getNodeValue(JSONObject objectFile, String path) {
+        JSONObject jsonObject = objectFile;
+        for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
             jsonObject = (JSONObject) jsonObject.get(node);
         }
-        return jsonObject.get(path.replaceAll(loop, ""));
+        return jsonObject.get(path.substring(path.lastIndexOf('.') + 1)).toString();
     }
 }
