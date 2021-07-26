@@ -44,6 +44,14 @@
       },
       "profileReg": {
         "buttonFrom" : "I accept rules, sign in"
+      },
+      "teamBuilder": {
+        "slashCreateTeamDesc": "Create a new team for this event",
+        "slashOptDescName": "The name of your new team",
+        "wrongChannel": "Wrong channel, this command only work on team channels",
+        "teamChannelName": "team-channel",
+        "teamCreated": "You successfully create the team <name>.",
+        "teamCreateError": "Sorry, you can't create this team."
       }
     }
   }

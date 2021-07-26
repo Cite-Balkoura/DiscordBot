@@ -1,8 +1,9 @@
-package fr.milekat.discordbot.bot.master.classes;
+package fr.milekat.discordbot.bot.master.managers;
 
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.bot.master.classes.Profile;
 
 public class ProfileManager {
     private static final Datastore DATASTORE = Main.getDatastore("master");

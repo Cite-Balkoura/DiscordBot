@@ -44,7 +44,7 @@ public class Init {
     public HashMap<String, Datastore> getDatastoreMap() {
         HashMap<String, Datastore> datastoreMap = new HashMap<>();
         for (Object dbName : ((JSONArray) ((JSONObject) ((JSONObject) Main.getConfig().get("data")).get("mongo")).get("databases"))) {
-            if (Main.DEBUG_ERROR) Main.log("Load db: " + dbName.toString());
+            if (Main.DEBUG_ERROR) Main.log("[Mongo] Load db: " + dbName.toString());
             datastoreMap.put(dbName.toString(), setDatastore(dbName.toString()));
         }
         if (Main.DEBUG_ERROR) Main.log("[Mongo] " + datastoreMap.size() + " db loaded");

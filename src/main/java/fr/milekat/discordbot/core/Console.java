@@ -2,7 +2,9 @@ package fr.milekat.discordbot.core;
 
 import fr.milekat.discordbot.Main;
 import net.dv8tion.jda.api.OnlineStatus;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Console {
@@ -15,7 +17,13 @@ public class Console {
                 } else if (input.equalsIgnoreCase("stop")) {
                     stopSequence();
                 } else if (input.equalsIgnoreCase("reload")) {
-                    Main.getBotManager().reloadConfig();
+                    try {
+                        Main.getBotManager().reloadConfig();
+                        Main.log("config.json file reloaded successfully");
+                    } catch (IOException | ParseException exception) {
+                        Main.log("config.json not found, reload cancelled");
+                        if (Main.DEBUG_ERROR) exception.printStackTrace();
+                    }
                 } else if (input.equalsIgnoreCase("debug")) {
                     debug();
                 } else if (input.equalsIgnoreCase("devmode")) {

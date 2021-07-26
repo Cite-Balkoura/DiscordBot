@@ -12,20 +12,22 @@ public class Event {
     @Indexed(options = @IndexOptions(unique = true))
     private final String name;
     private final String type;
-    private final ArrayList<EventFeature> features;
+    private final ArrayList<EventFeature> eventFeatures;
     private final Date startDate;
     private final Date endDate;
     private final String description;
     private final long roleId;
+    private final long categoryId;
 
-    public Event(String name, String type, ArrayList<EventFeature> features, Date startDate, Date endDate, String description, long roleId) {
+    public Event(String name, String type, ArrayList<EventFeature> eventFeatures, Date startDate, Date endDate, String description, long roleId, long categoryId) {
         this.name = name;
         this.type = type;
-        this.features = features;
+        this.eventFeatures = eventFeatures;
         this.startDate = startDate;
         this.endDate = endDate;
         this.description = description;
         this.roleId = roleId;
+        this.categoryId = categoryId;
     }
 
     public String getName() {
@@ -36,8 +38,8 @@ public class Event {
         return type;
     }
 
-    public ArrayList<EventFeature> getFeatures() {
-        return features;
+    public ArrayList<EventFeature> getEventFeatures() {
+        return eventFeatures;
     }
 
     public Date getStartDate() {
@@ -54,5 +56,9 @@ public class Event {
 
     public long getRoleId() {
         return roleId;
+    }
+
+    public long getCategoryId() {
+        return categoryId;
     }
 }

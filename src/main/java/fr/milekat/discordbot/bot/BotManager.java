@@ -18,7 +18,13 @@ public class BotManager {
     private static JSONObject CONFIG;
 
     public BotManager() {
-        reloadConfig();
+        try {
+            reloadConfig();
+            Main.log("config.json file loaded successfully");
+        } catch (IOException | ParseException exception) {
+            Main.log("config.json not found");
+            if (Main.DEBUG_ERROR) exception.printStackTrace();
+        }
         new MasterManager();
         new EventsManager();
         if (Main.DEBUG_ERROR) Main.log("Bot loaded");
@@ -27,13 +33,8 @@ public class BotManager {
     /**
      * Reload config.json file
      */
-    public void reloadConfig() {
-        try {
-            CONFIG = ((JSONObject) new JSONParser().parse(new FileReader("config.json")));
-        } catch (IOException | ParseException exception) {
-            Main.log("config.json not found");
-            if (Main.DEBUG_ERROR) exception.printStackTrace();
-        }
+    public void reloadConfig() throws IOException, ParseException {
+        CONFIG = ((JSONObject) new JSONParser().parse(new FileReader("config.json")));
     }
 
     /**

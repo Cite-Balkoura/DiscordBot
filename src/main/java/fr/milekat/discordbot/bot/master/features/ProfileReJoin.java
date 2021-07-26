@@ -1,7 +1,7 @@
 package fr.milekat.discordbot.bot.master.features;
 
 import fr.milekat.discordbot.bot.master.classes.Profile;
-import fr.milekat.discordbot.bot.master.classes.ProfileManager;
+import fr.milekat.discordbot.bot.master.managers.ProfileManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
