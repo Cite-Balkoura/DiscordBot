@@ -1,6 +1,7 @@
 package fr.milekat.discordbot.core;
 
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.OnlineStatus;
 import org.json.simple.parser.ParseException;
 
@@ -18,7 +19,7 @@ public class Console {
                     stopSequence();
                 } else if (input.equalsIgnoreCase("reload")) {
                     try {
-                        Main.getBotManager().reloadConfig();
+                        Config.reloadConfig();
                         Main.log("config.json file reloaded successfully");
                     } catch (IOException | ParseException exception) {
                         Main.log("config.json not found, reload cancelled");

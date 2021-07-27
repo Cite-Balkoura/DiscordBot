@@ -3,23 +3,22 @@ package fr.milekat.discordbot.bot;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.events.EventsManager;
 import fr.milekat.discordbot.bot.master.MasterManager;
+import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class BotManager {
-    private static JSONObject CONFIG;
-
     public BotManager() {
         try {
-            reloadConfig();
+            Config.reloadConfig();
             Main.log("config.json file loaded successfully");
         } catch (IOException | ParseException exception) {
             Main.log("config.json not found");
@@ -31,17 +30,28 @@ public class BotManager {
     }
 
     /**
-     * Reload config.json file
+     * Shortcut to reply to user interaction
      */
-    public void reloadConfig() throws IOException, ParseException {
-        CONFIG = ((JSONObject) new JSONParser().parse(new FileReader("config.json")));
+    public static void reply(GenericInteractionCreateEvent event, String path) {
+        event.reply(getMsg(path)).setEphemeral(true).queue();
+    }
+
+    /**
+     * Shortcut to reply to user interaction with args to replace
+     */
+    public static void reply(GenericInteractionCreateEvent event, String path, Map<String, String> args) {
+        String message = getMsg(path);
+        for (Map.Entry<String, String> map : args.entrySet()) {
+            message = message.replaceAll(map.getKey(), map.getValue());
+        }
+        event.reply(message).setEphemeral(true).queue();
     }
 
     /**
      * Shortcut to get Message from a config section
      */
     public static String getMsg(String path) {
-        return getNodeValue(CONFIG, "discord.msg." + path);
+        return getNodeValue(Config.getConfig(), "discord.msg." + path);
     }
 
     /**
@@ -76,7 +86,7 @@ public class BotManager {
      * Get discord id from config.json file
      */
     private static Long getId(String config) {
-        return Long.parseLong(getNodeValue(CONFIG, "discord.id." + config));
+        return Long.parseLong(getNodeValue(Config.getConfig(), "discord.id." + config));
     }
 
     /**

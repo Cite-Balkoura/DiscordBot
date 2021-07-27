@@ -7,7 +7,6 @@ import fr.milekat.discordbot.core.RabbitMQ;
 import fr.milekat.discordbot.utils.DateMileKat;
 import fr.milekat.discordbot.utils.WriteLog;
 import net.dv8tion.jda.api.JDA;
-import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 
@@ -16,14 +15,12 @@ public class Main {
     private static WriteLog logs;
     public static boolean DEBUG_ERROR = false;
     public static boolean MODE_DEV = false;
-    private static JSONObject configs;
     /* MongoDB */
     private static HashMap<String, Datastore> datastoreMap = new HashMap<>();
     /* Rabbit */
     public static boolean DEBUG_RABBIT = true;
     /* Discord Bot */
     private static JDA JDA;
-    private static BotManager BOT;
 
     /**
      * Main method
@@ -34,15 +31,13 @@ public class Main {
         Init init = new Init();
         //  Console load
         init.getConsole().start();
-        //  Config load
-        configs = init.getConfigs();
         //  Load Mongo
         datastoreMap = init.getDatastoreMap();
         //  Load RabbitMQ
         new RabbitMQ().getRabbitConsumer().start();
         //  Discord bot load
         JDA = init.getJDA();
-        BOT = new BotManager();
+        new BotManager();
         //  Log
         if (DEBUG_ERROR) log("Debugs enable");
         if (MODE_DEV) log("Mode dev enable");
@@ -58,21 +53,10 @@ public class Main {
     }
 
     /**
-     * "config.json" file
-     */
-    public static JSONObject getConfig() {
-        return configs;
-    }
-
-    /**
      * MongoDB Connection (Morphia Datastore) to query
      */
     public static Datastore getDatastore(String dbName) {
-        /*if (!datastoreMap.containsKey(dbName)) {
-            Main.log("[Error] Datastore '" + dbName + "' not found");
-            return null;
-        }*/
-        return datastoreMap.get(dbName);
+        return datastoreMap.get(dbName).startSession();
     }
 
     /**
@@ -80,12 +64,5 @@ public class Main {
      */
     public static JDA getJDA() {
         return JDA;
-    }
-
-    /**
-     * BOT Manager
-     */
-    public static BotManager getBotManager() {
-        return BOT;
     }
 }

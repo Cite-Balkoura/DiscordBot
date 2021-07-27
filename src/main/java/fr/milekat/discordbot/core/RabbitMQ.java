@@ -5,6 +5,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.utils.Config;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 public class RabbitMQ {
     private static Connection CONNECTION = null;
-    private static final JSONObject RABBIT_CONFIG = (JSONObject) ((JSONObject) Main.getConfig().get("data")).get("rabbitMQ");
+    private static final JSONObject RABBIT_CONFIG = (JSONObject) ((JSONObject) Config.getConfig().get("data")).get("rabbitMQ");
 
     /**
      * Init/Get RabbitMQ Connection

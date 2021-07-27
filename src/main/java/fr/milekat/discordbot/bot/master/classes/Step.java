@@ -1,25 +1,31 @@
 package fr.milekat.discordbot.bot.master.classes;
 
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 
 @Entity(value = "step")
 public class Step {
+    @Id
+    private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true))
-    private final String name;
-    private final String type;
-    private final String message;
-    private final int max;
-    private final int min;
-    private final String yes;
-    private final String no;
-    private final String returnStep;
-    private final ArrayList<String> choices;
-    private final String next;
-    private final boolean save;
+    private String name;
+    private String type;
+    private String message;
+    private int max;
+    private int min;
+    private String yes;
+    private String no;
+    private String returnStep;
+    private ArrayList<String> choices;
+    private String next;
+    private boolean save;
+
+    public Step() {}
 
     public Step(String name, String type, String message, int max, int min, String yes, String no, String returnStep, ArrayList<String> choices, String next, boolean save) {
         this.name = name;

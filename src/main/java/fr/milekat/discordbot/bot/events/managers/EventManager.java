@@ -20,9 +20,25 @@ public class EventManager {
     }
 
     /**
+     * Get an Event by Category id
+     */
+    public static Event getEvent(Long eventCategory) {
+        return DATASTORE.find(Event.class)
+                .filter(Filters.eq("categoryId", eventCategory))
+                .first();
+    }
+
+    /**
      * Get all events
      */
     public static ArrayList<Event> getEvents() {
         return new ArrayList<>(DATASTORE.find(Event.class).iterator().toList());
+    }
+
+    /**
+     * Save/Update an event
+     */
+    public static void save(Event event) {
+        DATASTORE.save(event);
     }
 }

@@ -1,14 +1,18 @@
 package fr.milekat.discordbot.bot.master.classes;
 
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 @Entity(value = "registration")
 public class Registration {
+    @Id
+    private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true))
     private String name;
     @Indexed(options = @IndexOptions(unique = true))
@@ -16,6 +20,8 @@ public class Registration {
     @Indexed(options = @IndexOptions(unique = true))
     private long discordId;
     private ArrayList<StepInput> inputs;
+
+    public Registration () {}
 
     public Registration(String name, UUID uuid, long discordId, ArrayList<StepInput> inputs) {
         this.name = name;
