@@ -1,7 +1,7 @@
 package fr.milekat.discordbot.bot.events.features;
 
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.BotManager;
+import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.events.classes.Event;
 import fr.milekat.discordbot.bot.events.classes.Participation;
 import fr.milekat.discordbot.bot.events.managers.EventManager;
@@ -25,7 +25,7 @@ public class JoinEvent extends ListenerAdapter {
      */
     @Override
     public void onButtonClick(ButtonClickEvent event) {
-        if (!event.getChannel().equals(BotManager.getChannel("cEvent"))) return;
+        if (!event.getChannel().equals(BotUtils.getChannel("cEvent"))) return;
         if (event.getButton()==null || !event.getButton().getLabel().equalsIgnoreCase(JOIN_EVENT)) return;
         addPlayerEventReg(event.getMember(), event.getUser(), event.getMessage());
     }
@@ -35,7 +35,7 @@ public class JoinEvent extends ListenerAdapter {
      */
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-        if (!event.getChannel().equals(BotManager.getChannel("cEvent"))) return;
+        if (!event.getChannel().equals(BotUtils.getChannel("cEvent"))) return;
         if (event.getMessage().getEmbeds().isEmpty() || event.getMessage().getEmbeds().get(0).getTitle()==null) return;
         event.getMessage().getButtons().add(Button.primary(event.getMessage().getEmbeds().get(0).getTitle(), JOIN_EVENT).withStyle(ButtonStyle.PRIMARY));
     }
@@ -46,7 +46,7 @@ public class JoinEvent extends ListenerAdapter {
     private void addPlayerEventReg(Member member, User user, Message message) {
         if (user.isBot() || message.getEmbeds().isEmpty()) return;
         //  Prevent a banned player to register to an event if he is currently banned
-        if (member.getRoles().contains(BotManager.getRole("rBan"))) return;
+        if (member.getRoles().contains(BotUtils.getRole("rBan"))) return;
         Event event = EventManager.getEvent(message.getEmbeds().get(0).getTitle());
         //  Check if member is already on this Event
         if (member.getRoles().contains(Main.getJDA().getRoleById(event.getRoleId()))) return;

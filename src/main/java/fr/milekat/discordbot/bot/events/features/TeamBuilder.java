@@ -1,7 +1,7 @@
 package fr.milekat.discordbot.bot.events.features;
 
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.BotManager;
+import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.events.classes.Event;
 import fr.milekat.discordbot.bot.events.classes.Team;
 import fr.milekat.discordbot.bot.events.managers.EventManager;
@@ -28,14 +28,14 @@ public class TeamBuilder extends ListenerAdapter {
                 .filter(event -> event.getEventFeatures().stream().anyMatch(eventFeature -> eventFeature.equals(Event.EventFeature.TEAM)))
                 .forEach(event -> Main.getJDA().getCategoryById(event.getCategoryId()).getTextChannels().stream()
                         .filter(textChannel -> textChannel.getName()
-                                .equalsIgnoreCase(BotManager.getMsg("teamBuilder.teamChannelName")))
+                                .equalsIgnoreCase(BotUtils.getMsg("teamBuilder.teamChannelName")))
                         .findFirst().ifPresent(TEAM_CHANNELS_LISTENER::add));
         //  Update Slash Command /team
-        BotManager.getGuild().upsertCommand(
-                new CommandData("team", BotManager.getMsg("teamBuilder.slashCreateTeamDesc"))
+        BotUtils.getGuild().upsertCommand(
+                new CommandData("team", BotUtils.getMsg("teamBuilder.slashCreateTeamDesc"))
                         .addOption(OptionType.STRING,
                                 "name",
-                                BotManager.getMsg("teamBuilder.slashOptDescName"),
+                                BotUtils.getMsg("teamBuilder.slashOptDescName"),
                                 true))
                 .queue();
     }
@@ -49,7 +49,7 @@ public class TeamBuilder extends ListenerAdapter {
         //  Check if channel is a TEAM_CHANNELS_LISTENER
         if (event.getChannel().getType()!= ChannelType.TEXT || !TEAM_CHANNELS_LISTENER.contains(event.getTextChannel())) {
             //event.reply(BotManager.getMsg()).setEphemeral(true).queue();
-            BotManager.reply(event, "teamBuilder.wrongChannel");
+            BotUtils.reply(event, "teamBuilder.wrongChannel");
             return;
         }
         //  Get Event and user Profile
@@ -57,12 +57,12 @@ public class TeamBuilder extends ListenerAdapter {
         Profile profile = ProfileManager.getProfile(event.getUser().getIdLong());
         //  Check if this team exists in this event
         if (TeamManager.exists(mcEvent, event.getOption("name").getAsString())) {
-            BotManager.reply(event, "teamBuilder.teamCreateError");
+            BotUtils.reply(event, "teamBuilder.teamCreateError");
             return;
         }
         Team team = new Team(mcEvent, event.getOption("name").getAsString());
         Main.log("[Event] New team '%s' in event '%s' created by '%s'.".formatted(team.getName(), mcEvent.getName(), event.getUser().getAsTag()));
-        BotManager.reply(event, "teamBuilder.teamCreated", Collections.singletonMap("<name>", team.getName()));
+        BotUtils.reply(event, "teamBuilder.teamCreated", Collections.singletonMap("<name>", team.getName()));
         // TODO: 28/07/2021 Add the profile of chief in team, to prevent duplicate null members in team
         //team.getMembers().add(profile);
         TeamManager.save(team);

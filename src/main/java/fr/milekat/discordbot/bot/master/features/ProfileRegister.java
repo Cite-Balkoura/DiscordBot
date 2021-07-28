@@ -1,6 +1,6 @@
 package fr.milekat.discordbot.bot.master.features;
 
-import fr.milekat.discordbot.bot.BotManager;
+import fr.milekat.discordbot.bot.BotUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Member;
@@ -18,8 +18,8 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        if (!event.getChannel().equals(BotManager.getChannel("cRegister"))) return;
-        event.getMessage().getButtons().add(Button.success(event.getAuthor().getName(), BotManager.getMsg("profileReg.buttonFrom")).withEmoji(Emoji.fromUnicode("\uD83D\uDCDD")));
+        if (!event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
+        event.getMessage().getButtons().add(Button.success(event.getAuthor().getName(), BotUtils.getMsg("profileReg.buttonFrom")).withEmoji(Emoji.fromUnicode("\uD83D\uDCDD")));
     }
 
     /**
@@ -27,9 +27,9 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onButtonClick(@Nonnull ButtonClickEvent event) {
-        if (!event.getChannel().equals(BotManager.getChannel("cRegister"))) return;
-        if (event.getMember().getRoles().contains(BotManager.getRole("rProfile"))) return;
-        if (event.getMember().getRoles().contains(BotManager.getRole("rWaiting"))) return;
+        if (!event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
+        if (event.getMember().getRoles().contains(BotUtils.getRole("rProfile"))) return;
+        if (event.getMember().getRoles().contains(BotUtils.getRole("rWaiting"))) return;
         openForm(event.getMember());
     }
 
@@ -45,7 +45,7 @@ public class ProfileRegister extends ListenerAdapter {
      * Open a new form (Ticket)
      */
     private void openForm(Member member) {
-        BotManager.getCategory("ccRegister").createTextChannel(member.getEffectiveName()).queue((textChannel) ->
+        BotUtils.getCategory("ccRegister").createTextChannel(member.getEffectiveName()).queue((textChannel) ->
                 textChannel.putPermissionOverride(member).setAllow(Permission.VIEW_CHANNEL).queue((ignore) -> {
             // TODO: 01/07/2021 Process steps, start from here
         }));
