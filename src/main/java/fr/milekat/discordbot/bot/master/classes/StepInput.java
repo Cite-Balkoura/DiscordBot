@@ -8,18 +8,18 @@ import org.bson.types.ObjectId;
 public class StepInput {
     @Id
     private ObjectId id;
-    private String name;
+    private Step step;
     private String answer;
 
     public StepInput() {}
 
-    public StepInput(String name, String answer) {
-        this.name = name;
+    public StepInput(Step step, String answer) {
+        this.step = step;
         this.answer = answer;
     }
 
-    public String getName() {
-        return name;
+    public Step getStep() {
+        return step;
     }
 
     public String getAnswer() {

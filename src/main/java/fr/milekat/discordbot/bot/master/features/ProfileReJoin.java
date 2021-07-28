@@ -27,7 +27,7 @@ public class ProfileReJoin extends ListenerAdapter {
             if (profile == null) return;
             gPublic.addRoleToMember(event.getMember(), rValid).queue();
             if (gPublic.getSelfMember().canInteract(event.getMember())) {
-                gPublic.modifyNickname(event.getMember(), profile.getName()).queue();
+                gPublic.modifyNickname(event.getMember(), profile.getUsername()).queue();
             }
         }
     }

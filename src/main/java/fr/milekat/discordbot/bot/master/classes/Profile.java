@@ -16,7 +16,7 @@ public class Profile {
     @Id
     private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true))
-    private String name;
+    private String username;
     @Indexed(options = @IndexOptions(unique = true))
     private UUID uuid;
     @Indexed(options = @IndexOptions(unique = true))
@@ -27,8 +27,8 @@ public class Profile {
 
     public Profile() {}
 
-    public Profile(String name, UUID uuid, long discordId, Date registerDate, ArrayList<StepInput> registerForm, ArrayList<Participation> participating) {
-        this.name = name;
+    public Profile(String username, UUID uuid, long discordId, Date registerDate, ArrayList<StepInput> registerForm, ArrayList<Participation> participating) {
+        this.username = username;
         this.uuid = uuid;
         this.discordId = discordId;
         this.registerDate = registerDate;
@@ -36,8 +36,8 @@ public class Profile {
         this.participating = participating;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
     public UUID getUuid() {

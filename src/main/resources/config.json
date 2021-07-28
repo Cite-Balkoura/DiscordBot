@@ -43,7 +43,10 @@
         "joinEventDate" : "This event will start on <START_DATE> and finish on <END_DATE>"
       },
       "profileReg": {
-        "buttonFrom" : "I accept rules, sign in"
+        "buttonFrom" : "I accept rules, sign in",
+        "rulesAlreadyAccepted": "You have already accepted the rules, if you haven't received a form yet, contact staff team",
+        "formOpenConfirm": "A channel has been created to finalize your registration! Look in #channel !",
+        "formFieldError": "Field poorly completed or unavailable, reread the question carefully!"
       },
       "teamBuilder": {
         "slashCreateTeamDesc": "Create a new team for this event",

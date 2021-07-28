@@ -1,21 +1,17 @@
 package fr.milekat.discordbot.bot;
 
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.bot.master.managers.RegistrationManager;
 import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import org.json.simple.JSONObject;
 
 import java.util.Map;
 
 public class BotUtils {
-    /**
-     * Replace "@mention" with mentioned user
-     */
-    public static String setNick(User user, String message) {
-        return message.replaceAll("@mention", user.getAsMention()).replaceAll("<pseudo>", user.getName());
-    }
-
     /**
      * Replace "<nickname>" with nickname of member
      */
@@ -25,42 +21,32 @@ public class BotUtils {
     }
 
     /**
-     * Method to send an embed in channel with ✅/❌
+     * Method to send an embed to user with ✅/❌ in button
      */
-    public static void sendEmbed(MessageChannel channel, MessageEmbed embed) {
-        channel.sendMessageEmbeds(embed).queue(message ->
-                message.addReaction("✅").queue(reaction ->
-                        message.addReaction("❌").queue()));
+    public static void sendRegister(Member member, MessageEmbed embed) {
+        if (RegistrationManager.exists(member.getIdLong())) {
+            RegistrationManager.getRegistration(member.getIdLong()).getChannel().sendMessageEmbeds(embed).setActionRow(
+                    Button.primary("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")).withStyle(ButtonStyle.SUCCESS),
+                    Button.primary("no", Emoji.fromMarkdown("<a:No:798960407708303403>")).withStyle(ButtonStyle.DANGER)
+            ).queue();
+        }
     }
 
     /**
-     * Method to send an embed to user with ✅/❌
+     * Shortcut to send a message to user in his register channel
      */
-    public static void sendPrivate(User user, MessageEmbed embed) {
-        user.openPrivateChannel().queue(privateChannel ->
-                        privateChannel.sendMessageEmbeds(embed).queue(message ->
-                                message.addReaction("✅").queue(reaction ->
-                                        message.addReaction("❌").queue())),
-                throwable -> cantSendPrivate(user)
-        );
+    public static void sendRegister(Member member, String string) {
+        if (RegistrationManager.exists(member.getIdLong())) {
+            RegistrationManager.getRegistration(member.getIdLong()).getChannel().sendMessage(string).queue();
+        }
     }
 
     /**
-     * Method to send a simple private message to user
+     * Shortcut to send a message to user in his register channel
      */
-    public static void sendPrivate(User user, String message) {
-        user.openPrivateChannel().queue(
-                privateChannel -> privateChannel.sendMessage(setNick(user, message)).queue(),
-                throwable -> cantSendPrivate(user)
-        );
-    }
-
-    /**
-     * If the bot got an issue when sending a private message to a User
-     */
-    private static void cantSendPrivate(User user) {
-        TextChannel channel = BotUtils.getChannel("cGeneral");
-        if (channel!=null) channel.sendMessage(setNick(user, BotUtils.getMsg("cantMp"))).queue();
+    public static void registerAdminAssist(Member member, String string) {
+        sendRegister(member, string);
+        sendRegister(member, getRole("").getAsMention() + " **HELP !**");
     }
 
     /**

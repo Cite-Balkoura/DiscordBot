@@ -14,8 +14,8 @@ public class Step {
     private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true))
     private String name;
-    private String type;
-    private String message;
+    private StepTypes type;
+    private String answer;
     private int max;
     private int min;
     private String yes;
@@ -25,12 +25,19 @@ public class Step {
     private String next;
     private boolean save;
 
+    public enum StepTypes{
+        TEXT,
+        VALID,
+        CHOICES,
+        FINAL
+    }
+
     public Step() {}
 
-    public Step(String name, String type, String message, int max, int min, String yes, String no, String returnStep, ArrayList<String> choices, String next, boolean save) {
+    public Step(String name, StepTypes type, String answer, int max, int min, String yes, String no, String returnStep, ArrayList<String> choices, String next, boolean save) {
         this.name = name;
         this.type = type;
-        this.message = message;
+        this.answer = answer;
         this.max = max;
         this.min = min;
         this.yes = yes;
@@ -45,12 +52,12 @@ public class Step {
         return name;
     }
 
-    public String getType() {
+    public StepTypes getType() {
         return type;
     }
 
-    public String getMessage() {
-        return message;
+    public String getAnswer() {
+        return answer;
     }
 
     public int getMax() {
