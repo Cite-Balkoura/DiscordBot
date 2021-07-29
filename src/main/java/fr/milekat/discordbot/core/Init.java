@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.bson.UuidRepresentation;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -53,6 +54,7 @@ public class Init {
                 (String) mongoConfig.get("db"),
                 ((String) mongoConfig.get("password")).toCharArray());
         MongoClientSettings settings = MongoClientSettings.builder()
+                .uuidRepresentation(UuidRepresentation.JAVA_LEGACY)
                 .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(new ServerAddress((String) mongoConfig.get("host"), ((Long) mongoConfig.get("port")).intValue()))))
                 .credential(credential)
                 .build();

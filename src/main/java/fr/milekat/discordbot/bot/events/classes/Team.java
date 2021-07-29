@@ -16,7 +16,7 @@ public class Team {
     private ObjectId id;
     private String name;
     private MorphiaReference<Event> event;
-    @Indexed(options = @IndexOptions(unique = true))
+    @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private MorphiaReference<ArrayList<Profile>> members;
 
     public Team() {}

@@ -27,8 +27,7 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectionMenuInter
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProfileRegister extends ListenerAdapter {
@@ -38,9 +37,12 @@ public class ProfileRegister extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if (RegistrationManager.isRegistration(event.getChannel().getIdLong()) && !event.getAuthor().isBot()) {
+            Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
+            if (!event.getMessage().getMentionedRoles().isEmpty() || !event.getMessage().getMentionedMembers().isEmpty()
+                    || registration==null || !event.getChannel().equals(registration.getChannel())) return;
             //  TEXT step update
             formStepReceive(event.getMessage(), event.getMember(),
-                    RegistrationManager.getRegistration(event.getMember().getIdLong()), null, null);
+                    RegistrationManager.getRegistration(event.getMember().getIdLong()), null, null, null);
             return;
         }
         if (event.getAuthor().isBot() || !event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
@@ -54,19 +56,21 @@ public class ProfileRegister extends ListenerAdapter {
     @Override
     public void onButtonClick(@Nonnull ButtonClickEvent event) {
         if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
+            Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
+            if (registration==null || !event.getChannel().equals(registration.getChannel())) return;
             //  VALID OR FINAL step update
-            formStepReceive(null, event.getMember(), RegistrationManager.getRegistration(event.getMember().getIdLong()),
-                    event.getButton(), null);
+            formStepReceive(event.getMessage(), event.getMember(),
+                    RegistrationManager.getRegistration(event.getMember().getIdLong()), event.getButton(), null, event);
             return;
         }
         if (!event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
-        if (event.getMember().getRoles().contains(BotUtils.getRole("rProfile")) ||
+        if (Objects.requireNonNull(event.getMember()).getRoles().contains(BotUtils.getRole("rProfile")) ||
                 event.getMember().getRoles().contains(BotUtils.getRole("rWaiting"))) {
             BotUtils.reply(event, "profileReg.rulesAlreadyAccepted");
             return;
         }
         //  Add "rWaiting" role to user
-        event.getGuild().addRoleToMember(event.getMember(), BotUtils.getRole("rWaiting")).queue();
+        BotUtils.getGuild().addRoleToMember(event.getMember(), BotUtils.getRole("rWaiting")).queue();
         //  Start form for user !
         openForm(event);
     }
@@ -76,22 +80,32 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onSelectionMenu(@Nonnull SelectionMenuEvent event) {
-        if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) formStepReceive(null, event.getMember(),
-                RegistrationManager.getRegistration(event.getMember().getIdLong()), null, event.getInteraction());
+        if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
+            Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
+            if (registration==null || !event.getChannel().equals(registration.getChannel())) return;
+            formStepReceive(event.getMessage(), event.getMember(),
+                    RegistrationManager.getRegistration(event.getMember().getIdLong()), null, event.getInteraction(), event);
+        }
     }
 
     /**
      * Open a new form (Ticket)
      */
     private void openForm(GenericComponentInteractionCreateEvent event) {
-        BotUtils.getCategory("ccRegister").createTextChannel(event.getMember().getEffectiveName()).queue((textChannel) -> {
+        BotUtils.getCategory("ccRegister").createTextChannel(event.getUser().getName()).queue((textChannel) -> {
             //  Add user to channel
-            textChannel.putPermissionOverride(event.getMember()).setAllow(Permission.VIEW_CHANNEL).queue();
+            textChannel.putPermissionOverride(Objects.requireNonNull(event.getMember())).setAllow(Permission.VIEW_CHANNEL).queue();
             //  Notify user of channel creation
             BotUtils.reply(event, "profileReg.formOpenConfirm", Collections.singletonMap("#channel", textChannel.getAsMention()));
             Registration registration = new Registration(event.getMember().getIdLong(), textChannel.getIdLong());
             RegistrationManager.save(registration);
-            formStepSend(event.getMember(), registration);
+            Main.getJDA().getTextChannelById(textChannel.getIdLong()).sendTyping().queue();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    formStepSend(event.getMember(), registration);
+                }
+            }, 1000L);
         });
     }
 
@@ -100,13 +114,13 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private void formStepSend(Member member, Registration registration) {
         if (!StepManager.exists(registration.getStep())) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Unregister step: " + registration.getStep());
+            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Unregister step: " + registration.getStep());
             return;
         }
         Step step = StepManager.getStep(registration.getStep());
-        if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Send step: " + step.getName());
+        if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Send step: " + step.getName());
         switch (step.getType()) {
-            case TEXT -> registration.getChannel().sendMessageEmbeds(getTextEmbed(member, step).build()).queue();
+            case TEXT -> registration.getChannel().sendMessageEmbeds(getMinMaxEmbed(member, step).build()).queue();
             case VALID -> {
                 if (step.getName().equalsIgnoreCase("Skin")) {  //  Skin step exception
                     BotUtils.sendRegister(member, getSkinEmbed(member, step, registration).build());
@@ -114,16 +128,17 @@ public class ProfileRegister extends ListenerAdapter {
                     BotUtils.sendRegister(member, getBasicEmbed(member, step).build());
                 }
             }
-            case CHOICES -> registration.getChannel().sendMessageEmbeds(getBasicEmbed(member, step).build()).setActionRow(
+            case CHOICES -> registration.getChannel().sendMessageEmbeds(getMinMaxEmbed(member, step).build()).setActionRow(
                     SelectionMenu.create(step.getName())
                             .addOptions(step.getChoices().stream().map(choice ->
                                     SelectOption.of(choice, choice)).collect(Collectors.toList()))
-                            .setMaxValues(step.getChoices().size())
+                            .setMinValues(step.getMin())
+                            .setMaxValues(step.getMax())
                             .build()
                     ).queue();
             case FINAL -> {
                 EmbedBuilder builder = getFinalEmbed(member, step, registration);
-                builder.setDescription(step.getAnswer());
+                builder.setDescription(step.getQuestion());
                 BotUtils.sendRegister(member, builder.build());
             }
             default -> {
@@ -135,74 +150,90 @@ public class ProfileRegister extends ListenerAdapter {
     /**
      * Execute actions for the current step of user
      */
-    private void formStepReceive(Message message, Member member, Registration registration, Button button, SelectionMenuInteraction selection) {
+    private void formStepReceive(Message message, Member member, Registration registration, Button button, SelectionMenuInteraction selection, GenericComponentInteractionCreateEvent event) {
         // TODO: 29/07/2021 Remove both user msg if exist, and bot message ! To prevent multiple reply
         if (registration == null) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Player null");
+            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Player null");
+            if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
             return;
         }
         if (registration.getDiscordId() != member.getIdLong()) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Id : " + registration.getDiscordId() + " / " + member.getIdLong());
+            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Id : " + registration.getDiscordId() + " / " + member.getIdLong());
+            if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
             return;
         }
         if (StepManager.exists(registration.getStep())) {
             //  Player is in form register
             Step step = StepManager.getStep(registration.getStep());
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Receive step: " + step.getName());
+            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Receive step: " + step.getName());
             switch (step.getType()) {
                 case TEXT -> {
+                    if (message==null) return;
                     if (step.getMin() <= message.getContentRaw().length() && step.getMax() >= message.getContentRaw().length()) {
                         if (step.getName().equalsIgnoreCase("Pseudo Mc")) { //  Username exception
                             if (ProfileManager.exists(message.getContentRaw())) {
-                                BotUtils.sendRegister(member, "profileReg.formFieldError");
+                                BotUtils.sendRegister(member, BotUtils.getMsg("profileReg.formFieldError"));
                             } else {
                                 try {
                                     registration.setUsername(message.getContentRaw());
                                     registration.setUuid(UUID.fromString(MojangNames.getUuid(message.getContentRaw())));
+                                    registration.setStep(step.getNext());
+                                    if (step.isSave()) registration.addInputs(new StepInput(step, message.getContentRaw()));
                                 } catch (IOException ignored) {
                                     BotUtils.registerAdminAssist(member, "Mojang data error please retry.");
-                                    if (Main.DEBUG_ERROR)
-                                        Main.log("[" + member.getAsMention() + "] Mojang data error, retry..");
-                                    formStepSend(member, registration);
+                                    if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Mojang data error, retry..");
+                                    return;
+                                } catch (IllegalArgumentException ignored) {
+                                    BotUtils.sendRegister(member, BotUtils.getMsg("profileReg.formFieldError"));
                                     return;
                                 }
                             }
+                        } else {
+                            registration.setStep(step.getNext());
+                            if (step.isSave()) registration.addInputs(new StepInput(step, message.getContentRaw()));
                         }
-                        if (step.isSave()) registration.addInputs(new StepInput(step, message.getContentRaw()));
                     } else {
                         BotUtils.sendRegister(member, BotUtils.getMsg("profileReg.formFieldError"));
                     }
                 }
                 case VALID -> {
-                    if (button.getLabel().equalsIgnoreCase("yes")) {
-                        BotUtils.sendRegister(member, step.getYes());
+                    if (button==null || button.getId()==null || button.getEmoji()==null) return;
+                    message.editMessageComponents().setActionRows().queue();
+                    if (button.getId().equalsIgnoreCase("yes")) {
+                        event.reply(button.getEmoji().getAsMention() + step.getYes()).queue();
                         registration.setStep(step.getNext());
                         if (step.isSave()) registration.addInputs(new StepInput(step, button.getLabel()));
-                    } else if (button.getLabel().equalsIgnoreCase("no")) {
-                        BotUtils.sendRegister(member, step.getNo());
+                    } else if (button.getId().equalsIgnoreCase("no")) {
+                        event.reply(button.getEmoji().getAsMention() + step.getNo()).queue();
                         registration.setStep(step.getReturnStep());
                     } else {
                         BotUtils.registerAdminAssist(member, "Responses unknown ?");
                     }
                 }
                 case CHOICES -> {
-                    registration.setStep(step.getNext());
-                    if (step.isSave()) registration.addInputs(new StepInput(step, selection.getSelectedOptions()
+                    if (selection==null || selection.getSelectedOptions()==null) return;
+                    message.editMessageComponents().setActionRows().queue();
+                    String choices = selection.getSelectedOptions()
                             .stream()
-                            .map(SelectOption::getDescription)
-                            .collect(Collectors.joining(", "))));
+                            .map(SelectOption::getLabel)
+                            .collect(Collectors.joining(", "));
+                    event.reply(choices).queue();
+                    registration.setStep(step.getNext());
+                    if (step.isSave()) registration.addInputs(new StepInput(step, choices));
                 }
                 case FINAL -> {
-                    if (button.getLabel().equalsIgnoreCase("yes")) {
+                    if (button==null || button.getId()==null || button.getEmoji()==null) return;
+                    message.editMessageComponents().setActionRows().queue();
+                    if (button.getId().equalsIgnoreCase("yes")) {
                         // TODO: 29/07/2021 Send form to staff
                         //manager.sendEmbed(cCandid, getFinalEmbed(user, player).build());
-                        BotUtils.sendRegister(member, step.getYes());
+                        event.reply(button.getEmoji().getAsMention() + step.getYes()).queue();
                         registration.setStep("WAITING");
                         BotUtils.getGuild().addRoleToMember(member, BotUtils.getRole("rWaiting")).queue();
                         return; //  End of from !
                         // TODO: 29/07/2021 Properly end the form
-                    } else if (button.getLabel().equalsIgnoreCase("no")) {
-                        BotUtils.sendRegister(member, step.getNo());
+                    } else if (button.getId().equalsIgnoreCase("no")) {
+                        event.reply(button.getEmoji().getAsMention() + step.getNo()).queue();
                         registration.setStep(step.getReturnStep());
                     } else {
                         BotUtils.registerAdminAssist(member, "Responses unknown ?");
@@ -210,7 +241,13 @@ public class ProfileRegister extends ListenerAdapter {
                 }
             }
             RegistrationManager.save(registration);
-            formStepSend(member, registration);
+            Main.getJDA().getTextChannelById(registration.getChannel().getIdLong()).sendTyping().queue();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    formStepSend(member, registration);
+                }
+            }, 1000L);
         } else if (registration.getStep().equals("REFUSED")) {
             // TODO: 28/07/2021 Notify player he is refused
         } else {
@@ -223,18 +260,18 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private EmbedBuilder getBasicEmbed(Member member, Step step) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getAnswer()));
+        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getQuestion()));
         return builder;
     }
 
     /**
      * Get an embed for a TEXT step (= Basic with Min/Max fields)
      */
-    private EmbedBuilder getTextEmbed(Member member, Step step) {
+    private EmbedBuilder getMinMaxEmbed(Member member, Step step) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getAnswer()))
-                .addField("Min chars", String.valueOf(step.getMin()), true)
-                .addField("Max chars", String.valueOf(step.getMax()), true);
+        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getQuestion()))
+                .addField("Min", String.valueOf(step.getMin()), true)
+                .addField("Max", String.valueOf(step.getMax()), true);
         return builder;
     }
 
@@ -243,7 +280,7 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private EmbedBuilder getSkinEmbed(Member member, Step step, Registration registration) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getAnswer())).setImage(
+        builder.setColor(Color.BLUE).setDescription(BotUtils.setNick(member, step.getQuestion())).setImage(
                 "https://crafatar.com/renders/body/" + registration.getUuid().toString() + "?size=512&overlay&default=MHF_Alex");
         return builder;
     }
@@ -253,10 +290,10 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private EmbedBuilder getFinalEmbed(Member member, Step step, Registration registration) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.red).setDescription(BotUtils.setNick(member, step.getAnswer())).setThumbnail(
+        builder.setColor(Color.red).setDescription(BotUtils.setNick(member, step.getQuestion())).setThumbnail(
                 "https://crafatar.com/renders/body/" + registration.getUuid().toString() + "?size=512&overlay&default=MHF_Alex");
         for (StepInput input : registration.getInputs()) {
-            builder.addField(":question: " + input.getStep(), ":arrow_right: " + input.getAnswer() + "\n", false);
+            builder.addField(":question: " + input.getStep().getName(), ":arrow_right: " + input.getAnswer() + "\n", false);
         }
         builder.setFooter(String.valueOf(registration.getDiscordId()));
         return builder;

@@ -32,6 +32,7 @@
       "cGeneral" : 0,
       "cRegister" : 0,
       "cEvent" : 0,
+      "rAdmin": 0,
       "rProfile" : 0,
       "rWaiting" : 0
     },

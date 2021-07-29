@@ -15,9 +15,9 @@ public class Step {
     @Indexed(options = @IndexOptions(unique = true))
     private String name;
     private StepTypes type;
-    private String answer;
-    private int max;
+    private String question;
     private int min;
+    private int max;
     private String yes;
     private String no;
     private String returnStep;
@@ -34,12 +34,12 @@ public class Step {
 
     public Step() {}
 
-    public Step(String name, StepTypes type, String answer, int max, int min, String yes, String no, String returnStep, ArrayList<String> choices, String next, boolean save) {
+    public Step(String name, StepTypes type, String question, int min, int max, String yes, String no, String returnStep, ArrayList<String> choices, String next, boolean save) {
         this.name = name;
         this.type = type;
-        this.answer = answer;
-        this.max = max;
+        this.question = question;
         this.min = min;
+        this.max = max;
         this.yes = yes;
         this.no = no;
         this.returnStep = returnStep;
@@ -56,16 +56,16 @@ public class Step {
         return type;
     }
 
-    public String getAnswer() {
-        return answer;
-    }
-
-    public int getMax() {
-        return max;
+    public String getQuestion() {
+        return question;
     }
 
     public int getMin() {
         return min;
+    }
+
+    public int getMax() {
+        return max;
     }
 
     public String getYes() {

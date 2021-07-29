@@ -4,6 +4,7 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.bot.events.classes.Participation;
 import org.bson.types.ObjectId;
 
@@ -22,7 +23,7 @@ public class Profile {
     @Indexed(options = @IndexOptions(unique = true))
     private long discordId;
     private Date registerDate;
-    private ArrayList<StepInput> registerForm;
+    private MorphiaReference<ArrayList<StepInput>> registerForm;
     private ArrayList<Participation> participating;
 
     public Profile() {}
@@ -32,7 +33,7 @@ public class Profile {
         this.uuid = uuid;
         this.discordId = discordId;
         this.registerDate = registerDate;
-        this.registerForm = registerForm;
+        this.registerForm = MorphiaReference.wrap(registerForm);
         this.participating = participating;
     }
 
@@ -53,7 +54,7 @@ public class Profile {
     }
 
     public ArrayList<StepInput> getRegisterForm() {
-        return registerForm;
+        return registerForm.get();
     }
 
     public ArrayList<Participation> getParticipating() {

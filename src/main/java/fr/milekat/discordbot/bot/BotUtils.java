@@ -46,7 +46,7 @@ public class BotUtils {
      */
     public static void registerAdminAssist(Member member, String string) {
         sendRegister(member, string);
-        sendRegister(member, getRole("").getAsMention() + " **HELP !**");
+        sendRegister(member, getRole("rAdmin").getAsMention() + " **HELP !**");
     }
 
     /**
