@@ -2,6 +2,7 @@ package fr.milekat.discordbot.bot.master.features;
 
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
+import fr.milekat.discordbot.bot.master.classes.Profile;
 import fr.milekat.discordbot.bot.master.classes.Registration;
 import fr.milekat.discordbot.bot.master.classes.Step;
 import fr.milekat.discordbot.bot.master.classes.StepInput;
@@ -17,9 +18,15 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenuInteraction;
@@ -31,13 +38,54 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProfileRegister extends ListenerAdapter {
+    public ProfileRegister() {
+        BotUtils.getGuild().upsertCommand(
+                new CommandData("register", BotUtils.getMsg("profileReg.slashRegister"))
+                        .addOptions(new OptionData(OptionType.STRING,
+                                        "action",
+                                        BotUtils.getMsg("profileReg.slashOptAction"),
+                                        true).addChoice("set-step", "set-step"),
+                                new OptionData(OptionType.STRING,
+                                        "name",
+                                        BotUtils.getMsg("profileReg.slashOptStepName"),
+                                        true).addChoices(StepManager.getSteps().stream()
+                                        .map(step -> new Command.Choice(step.getName(), step.getName()))
+                                        .toList()
+                                )
+                        )
+        ).queue();
+    }
+
+    /**
+     * Set step command
+     */
+    @Override
+    public void onSlashCommand(@Nonnull SlashCommandEvent event) {
+        if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
+            event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
+            return;
+        }
+        if (!RegistrationManager.isRegistration(event.getChannel().getIdLong())) {
+            event.reply("Bad channel").setEphemeral(true).queue();
+            return;
+        }
+        Registration registration = RegistrationManager.getRegistrationByChannel(event.getTextChannel().getIdLong());
+        if (event.getOption("action")!=null && event.getOption("name")!=null &&
+                event.getOption("action").getAsString().equalsIgnoreCase("set-step")) {
+            registration.setStep(event.getOption("name").getAsString());
+            RegistrationManager.save(registration);
+            BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(member -> formStepSend(member, registration));
+        }
+        event.reply("Done !").setEphemeral(true).queue();
+    }
+
     /**
      * Add button on new message in Event channel
      */
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if (RegistrationManager.isRegistration(event.getChannel().getIdLong()) && !event.getAuthor().isBot()) {
-            Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
+            Registration registration = RegistrationManager.getRegistration(event.getMember().getIdLong());
             if (!event.getMessage().getMentionedRoles().isEmpty() || !event.getMessage().getMentionedMembers().isEmpty()
                     || registration==null || !event.getChannel().equals(registration.getChannel())) return;
             //  TEXT step update
@@ -55,24 +103,36 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onButtonClick(@Nonnull ButtonClickEvent event) {
-        if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
+        if (event.getMember()==null || event.getButton()==null) return;
+        if (event.getChannel().equals(BotUtils.getChannel("cRegister"))) {
+            if (event.getMember().getRoles().contains(BotUtils.getRole("rProfile"))) {
+                BotUtils.reply(event, "profileReg.rulesAlreadyRegistered");
+                return;
+            }
+            if(event.getMember().getRoles().contains(BotUtils.getRole("rWaiting"))) {
+                BotUtils.reply(event, "profileReg.rulesAlreadyAccepted");
+                return;
+            }
+            //  Add "rWaiting" role to user
+            BotUtils.getGuild().addRoleToMember(event.getMember(), BotUtils.getRole("rWaiting")).queue();
+            //  Start form for user !
+            openForm(event);
+        } else if (event.getChannel().equals(BotUtils.getChannel("cStaffValidation"))) {
+            if (event.getMessage()==null || event.getMember()==null || event.getButton()==null) return;
+            staffVote(event.getMessage(), event.getMember(), event.getButton());
+            event.reply("Voted !").setEphemeral(true).queue();
+        } else if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
             Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
             if (registration==null || !event.getChannel().equals(registration.getChannel())) return;
-            //  VALID OR FINAL step update
-            formStepReceive(event.getMessage(), event.getMember(),
-                    RegistrationManager.getRegistration(event.getMember().getIdLong()), event.getButton(), null, event);
-            return;
+            if (event.getButton().getId().equalsIgnoreCase("acknowledge")) {
+                event.reply("bey").setEphemeral(true).queue();
+                registration.getChannel().delete().reason("Remove button click by " + event.getUser().getAsTag()).queue();
+            } else {
+                //  VALID OR FINAL step update
+                formStepReceive(event.getMessage(), event.getMember(),
+                        RegistrationManager.getRegistration(event.getMember().getIdLong()), event.getButton(), null, event);
+            }
         }
-        if (!event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
-        if (Objects.requireNonNull(event.getMember()).getRoles().contains(BotUtils.getRole("rProfile")) ||
-                event.getMember().getRoles().contains(BotUtils.getRole("rWaiting"))) {
-            BotUtils.reply(event, "profileReg.rulesAlreadyAccepted");
-            return;
-        }
-        //  Add "rWaiting" role to user
-        BotUtils.getGuild().addRoleToMember(event.getMember(), BotUtils.getRole("rWaiting")).queue();
-        //  Start form for user !
-        openForm(event);
     }
 
     /**
@@ -83,6 +143,7 @@ public class ProfileRegister extends ListenerAdapter {
         if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
             Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
             if (registration==null || !event.getChannel().equals(registration.getChannel())) return;
+            //  CHOICE
             formStepReceive(event.getMessage(), event.getMember(),
                     RegistrationManager.getRegistration(event.getMember().getIdLong()), null, event.getInteraction(), event);
         }
@@ -135,9 +196,9 @@ public class ProfileRegister extends ListenerAdapter {
                             .setMinValues(step.getMin())
                             .setMaxValues(step.getMax())
                             .build()
-                    ).queue();
+            ).queue();
             case FINAL -> {
-                EmbedBuilder builder = getFinalEmbed(member, step, registration);
+                EmbedBuilder builder = getFinalEmbed(registration, step.getQuestion());
                 builder.setDescription(step.getQuestion());
                 BotUtils.sendRegister(member, builder.build());
             }
@@ -151,7 +212,6 @@ public class ProfileRegister extends ListenerAdapter {
      * Execute actions for the current step of user
      */
     private void formStepReceive(Message message, Member member, Registration registration, Button button, SelectionMenuInteraction selection, GenericComponentInteractionCreateEvent event) {
-        // TODO: 29/07/2021 Remove both user msg if exist, and bot message ! To prevent multiple reply
         if (registration == null) {
             if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Player null");
             if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
@@ -225,13 +285,17 @@ public class ProfileRegister extends ListenerAdapter {
                     if (button==null || button.getId()==null || button.getEmoji()==null) return;
                     message.editMessageComponents().setActionRows().queue();
                     if (button.getId().equalsIgnoreCase("yes")) {
-                        // TODO: 29/07/2021 Send form to staff
-                        //manager.sendEmbed(cCandid, getFinalEmbed(user, player).build());
+                        BotUtils.getChannel("cStaffValidation")
+                                .sendMessageEmbeds(getFinalEmbed(registration, BotUtils.getMsg("profileReg.staffNewForm")).build())
+                                .setActionRow(Button.primary("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")).withStyle(ButtonStyle.SUCCESS),
+                                        Button.primary("no", Emoji.fromMarkdown("<a:No:798960407708303403>")).withStyle(ButtonStyle.DANGER))
+                                .queue(staffEmbed -> {
+                                    registration.setFormId(staffEmbed.getIdLong());
+                                    registration.setStep("WAITING");
+                                    RegistrationManager.save(registration);
+                                });
                         event.reply(button.getEmoji().getAsMention() + step.getYes()).queue();
-                        registration.setStep("WAITING");
-                        BotUtils.getGuild().addRoleToMember(member, BotUtils.getRole("rWaiting")).queue();
-                        return; //  End of from !
-                        // TODO: 29/07/2021 Properly end the form
+                        return; //  End of from ! Now in admin side
                     } else if (button.getId().equalsIgnoreCase("no")) {
                         event.reply(button.getEmoji().getAsMention() + step.getNo()).queue();
                         registration.setStep(step.getReturnStep());
@@ -248,11 +312,60 @@ public class ProfileRegister extends ListenerAdapter {
                     formStepSend(member, registration);
                 }
             }, 1000L);
-        } else if (registration.getStep().equals("REFUSED")) {
-            // TODO: 28/07/2021 Notify player he is refused
         } else {
-            // TODO: 28/07/2021 Send DATA ERROR
+            BotUtils.registerAdminAssist(member, "Data error ?");
         }
+    }
+
+    /**
+     * Proceed to a new vote entry from staff
+     */
+    private void staffVote(Message message, Member member, Button button) {
+        Registration registration = RegistrationManager.getRegistrationByForm(message.getIdLong());
+        registration.addVote(member.getIdLong(), button.getId().equalsIgnoreCase("yes"));
+        EmbedBuilder embedBuilder = getFinalEmbed(registration, BotUtils.getMsg("profileReg.staffNewForm"));
+        embedBuilder.addField(BotUtils.getMsg("profileReg.votesYes") + " (" + registration.getVotes().values().stream().filter(Boolean::booleanValue).count() + ")",
+                registration.getVotes()
+                        .entrySet()
+                        .stream()
+                        .filter(Map.Entry::getValue)
+                        .map(longBooleanEntry -> Main.getJDA().retrieveUserById(longBooleanEntry.getKey()).complete().getName())
+                        .collect(Collectors.joining("\n")),
+                true);
+        embedBuilder.addField(BotUtils.getMsg("profileReg.votesNo") + " (" + registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() + ")",
+                registration.getVotes()
+                        .entrySet()
+                        .stream()
+                        .filter(longBooleanEntry -> !longBooleanEntry.getValue())
+                        .map(longBooleanEntry -> Main.getJDA().retrieveUserById(longBooleanEntry.getKey()).complete().getName())
+                        .collect(Collectors.joining("\n")),
+                true);
+        message.suppressEmbeds(false).queue(unused -> message.editMessageEmbeds(embedBuilder.build()).queue(msg -> {
+            if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 5) {
+                registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
+                        Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                ).queue();
+                BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
+                    if (BotUtils.getGuild().getSelfMember().canInteract(member)) {
+                        BotUtils.getGuild().modifyNickname(member, registration.getUsername()).queue();
+                        BotUtils.getGuild().addRoleToMember(member, BotUtils.getRole("rProfile")).queue();
+                        BotUtils.getGuild().removeRoleFromMember(member, BotUtils.getRole("rWaiting")).queue();
+                    }
+                });
+                registration.setStep("DONE");
+                RegistrationManager.save(registration);
+                ProfileManager.save(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
+                BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
+                msg.delete().queue();
+            } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 5) {
+                registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
+                        Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                ).queue();
+                BotUtils.getChannel("cRejected").sendMessage(msg).setActionRows().queue();
+                msg.delete().queue();
+            }
+        }));
+        RegistrationManager.save(registration);
     }
 
     /**
@@ -288,14 +401,14 @@ public class ProfileRegister extends ListenerAdapter {
     /**
      * Get an embed with full responses of player
      */
-    private EmbedBuilder getFinalEmbed(Member member, Step step, Registration registration) {
+    private EmbedBuilder getFinalEmbed(Registration registration, String description) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.red).setDescription(BotUtils.setNick(member, step.getQuestion())).setThumbnail(
+        builder.setColor(Color.red).setDescription(description).setThumbnail(
                 "https://crafatar.com/renders/body/" + registration.getUuid().toString() + "?size=512&overlay&default=MHF_Alex");
-        for (StepInput input : registration.getInputs()) {
-            builder.addField(":question: " + input.getStep().getName(), ":arrow_right: " + input.getAnswer() + "\n", false);
-        }
-        builder.setFooter(String.valueOf(registration.getDiscordId()));
+        registration.getInputs().forEach(input -> builder.addField(
+                ":question: " + input.getStep().getName(),
+                ":arrow_right: " + input.getAnswer(),
+                false));
         return builder;
     }
 }

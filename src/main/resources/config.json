@@ -31,6 +31,9 @@
       "ccRegister" : 0,
       "cGeneral" : 0,
       "cRegister" : 0,
+      "cStaffValidation": 0,
+      "cValidated": 0,
+      "cRejected": 0,
       "cEvent" : 0,
       "rAdmin": 0,
       "rProfile" : 0,
@@ -38,16 +41,28 @@
     },
     "msg": {
       "cantMp" : "Hey @mention, I can't dm you",
+      "noPerm": "Sorry, you don't have this permission",
       "joinEvent": {
         "joinEvent" : "Thank to join the event <EVENT_NAME>",
         "joinEventDescription" : "Event description: ",
         "joinEventDate" : "This event will start on <START_DATE> and finish on <END_DATE>"
       },
       "profileReg": {
+        "slashRegister": "Register form manage command",
+        "slashOptAction" : "Select an action",
+        "slashOptStepName": "Select a step to set",
         "buttonFrom" : "I accept rules, sign in",
+        "rulesAlreadyRegistered": "You are already registered !",
         "rulesAlreadyAccepted": "You have already accepted the rules, if you haven't received a form yet, contact staff team",
         "formOpenConfirm": "A channel has been created to finalize your registration! Look in #channel !",
-        "formFieldError": "Field poorly completed or unavailable, reread the question carefully!"
+        "formFieldError": "Field poorly completed or unavailable, reread the question carefully!",
+        "staffNewForm": "New from to evaluate !",
+        "votesYes": "Yes",
+        "votesNo": "No",
+        "closeChannelButton": "Close this channel",
+        "userAccepted": "Congratulation you have been accepted !",
+        "userRefused": "You have been refused ! Sorry.",
+        "buttonAcknowledge": "Close this channel"
       },
       "teamBuilder": {
         "slashCreateTeamDesc": "Create a new team for this event",

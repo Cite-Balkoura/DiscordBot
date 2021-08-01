@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity(value = "registration")
@@ -26,6 +28,8 @@ public class Registration {
     private long registerChannelId;
     private String step;
     private MorphiaReference<ArrayList<StepInput>> inputs;
+    private long formId;
+    private HashMap<Long, Boolean> votes;
 
     public Registration() {}
 
@@ -33,15 +37,6 @@ public class Registration {
         this.discordId = discordId;
         this.registerChannelId = registerChannelId;
         this.step = "Start";
-    }
-
-    public Registration(String username, UUID uuid, long discordId, long registerChannelId, String step, ArrayList<StepInput> inputs) {
-        this.username = username;
-        this.uuid = uuid;
-        this.discordId = discordId;
-        this.registerChannelId = registerChannelId;
-        this.step = step;
-        this.inputs = MorphiaReference.wrap(inputs);
     }
 
     public String getUsername() {
@@ -81,7 +76,8 @@ public class Registration {
     }
 
     public ArrayList<StepInput> getInputs() {
-        return this.inputs==null ? new ArrayList<>() : new ArrayList<>(this.inputs.get());
+        return new ArrayList<>(Optional.ofNullable(this.inputs.get()).orElse(new ArrayList<>()));
+
     }
 
     public void setInputs(ArrayList<StepInput> inputs) {
@@ -96,5 +92,23 @@ public class Registration {
         inputs.add(input);
         this.inputs = MorphiaReference.wrap(inputs);
         StepInputManager.save(input);
+    }
+
+    public HashMap<Long, Boolean> getVotes() {
+        return new HashMap<>(Optional.ofNullable(this.votes).orElse(new HashMap<>()));
+    }
+
+    public void addVote(Long userId, boolean accept) {
+        HashMap<Long, Boolean> votes = getVotes();
+        votes.put(userId, accept);
+        this.votes = votes;
+    }
+
+    public long getFormId() {
+        return formId;
+    }
+
+    public void setFormId(long formId) {
+        this.formId = formId;
     }
 }

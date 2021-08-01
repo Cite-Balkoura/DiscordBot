@@ -27,6 +27,24 @@ public class RegistrationManager {
     }
 
     /**
+     * Get a Registration by his formId
+     */
+    public static Registration getRegistrationByForm(Long formId) {
+        return DATASTORE.find(Registration.class)
+                .filter(Filters.eq("formId", formId))
+                .first();
+    }
+
+    /**
+     * Check if channel is a Registration channel
+     */
+    public static Registration getRegistrationByChannel(Long registerChannelId) {
+        return DATASTORE.find(Registration.class)
+                .filter(Filters.eq("registerChannelId", registerChannelId))
+                .first();
+    }
+
+    /**
      * Check if channel is a Registration channel
      */
     public static boolean isRegistration(Long registerChannelId) {

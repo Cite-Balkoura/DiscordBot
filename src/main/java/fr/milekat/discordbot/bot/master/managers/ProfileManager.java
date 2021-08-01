@@ -34,4 +34,11 @@ public class ProfileManager {
                 .filter(Filters.eq("discordId", discordId))
                 .first()!=null;
     }
+
+    /**
+     * Save/Update a Profile
+     */
+    public static void save(Profile profile) {
+        DATASTORE.save(profile);
+    }
 }
