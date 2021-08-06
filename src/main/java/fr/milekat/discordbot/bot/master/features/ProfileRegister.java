@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
@@ -43,17 +44,19 @@ public class ProfileRegister extends ListenerAdapter {
                 new CommandData("register", BotUtils.getMsg("profileReg.slashRegister"))
                         .addOptions(new OptionData(OptionType.STRING,
                                         "action",
-                                        BotUtils.getMsg("profileReg.slashOptAction"),
+                                        BotUtils.getMsg("profileReg.slashOptDescAction"),
                                         true).addChoice("set-step", "set-step"),
                                 new OptionData(OptionType.STRING,
                                         "name",
-                                        BotUtils.getMsg("profileReg.slashOptStepName"),
+                                        BotUtils.getMsg("profileReg.slashOptDescStepName"),
                                         true).addChoices(StepManager.getSteps().stream()
                                         .map(step -> new Command.Choice(step.getName(), step.getName()))
                                         .toList()
                                 )
-                        )
-        ).queue();
+                        ).setDefaultEnabled(false)
+        ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
+                new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
+        ).queue());
     }
 
     /**
@@ -61,6 +64,7 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onSlashCommand(@Nonnull SlashCommandEvent event) {
+        if (!event.getName().equalsIgnoreCase("register")) return;
         if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
             event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
             return;
@@ -341,15 +345,16 @@ public class ProfileRegister extends ListenerAdapter {
                         .collect(Collectors.joining("\n")),
                 true);
         message.suppressEmbeds(false).queue(unused -> message.editMessageEmbeds(embedBuilder.build()).queue(msg -> {
-            if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 5) {
+            if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 5 ||
+                    (button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
                         Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
                 ).queue();
                 BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
-                    if (BotUtils.getGuild().getSelfMember().canInteract(member)) {
-                        BotUtils.getGuild().modifyNickname(member, registration.getUsername()).queue();
-                        BotUtils.getGuild().addRoleToMember(member, BotUtils.getRole("rProfile")).queue();
-                        BotUtils.getGuild().removeRoleFromMember(member, BotUtils.getRole("rWaiting")).queue();
+                    if (BotUtils.getGuild().getSelfMember().canInteract(target)) {
+                        BotUtils.getGuild().modifyNickname(target, registration.getUsername()).queue();
+                        BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
+                        BotUtils.getGuild().removeRoleFromMember(target, BotUtils.getRole("rWaiting")).queue();
                     }
                 });
                 registration.setStep("DONE");
@@ -357,12 +362,15 @@ public class ProfileRegister extends ListenerAdapter {
                 ProfileManager.save(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
                 BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
-            } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 5) {
+                if (Main.DEBUG_ERROR) Main.log("[" + registration.getUsername() + "] Register validated");
+            } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 5 ||
+                    (!button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
                         Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
                 ).queue();
                 BotUtils.getChannel("cRejected").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
+                if (Main.DEBUG_ERROR) Main.log("[" + registration.getUsername() + "] Register validated");
             }
         }));
         RegistrationManager.save(registration);

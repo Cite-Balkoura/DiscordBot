@@ -12,7 +12,6 @@ import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.UUID;
 
 @Entity(value = "registration")
@@ -76,8 +75,7 @@ public class Registration {
     }
 
     public ArrayList<StepInput> getInputs() {
-        return new ArrayList<>(Optional.ofNullable(this.inputs.get()).orElse(new ArrayList<>()));
-
+        return this.inputs==null ? new ArrayList<>() : new ArrayList<>(this.inputs.get());
     }
 
     public void setInputs(ArrayList<StepInput> inputs) {
@@ -95,7 +93,7 @@ public class Registration {
     }
 
     public HashMap<Long, Boolean> getVotes() {
-        return new HashMap<>(Optional.ofNullable(this.votes).orElse(new HashMap<>()));
+        return this.votes==null ? new HashMap<>() : new HashMap<>(this.votes);
     }
 
     public void addVote(Long userId, boolean accept) {
