@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.Map;
@@ -112,11 +113,22 @@ public class BotUtils {
     /**
      * Return the value of node
      */
-    private static String getNodeValue(JSONObject objectFile, String path) {
+    public static String getNodeValue(JSONObject objectFile, String path) {
         JSONObject jsonObject = objectFile;
         for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
             jsonObject = (JSONObject) jsonObject.get(node);
         }
         return jsonObject.get(path.substring(path.lastIndexOf('.') + 1)).toString();
+    }
+
+    /**
+     * Return the array of node
+     */
+    public static JSONArray getNodeArray(JSONObject objectFile, String path) {
+        JSONObject jsonObject = objectFile;
+        for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
+            jsonObject = (JSONObject) jsonObject.get(node);
+        }
+        return (JSONArray) jsonObject.get(path.substring(path.lastIndexOf('.') + 1));
     }
 }

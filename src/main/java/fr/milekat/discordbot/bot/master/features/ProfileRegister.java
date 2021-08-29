@@ -157,11 +157,12 @@ public class ProfileRegister extends ListenerAdapter {
      * Open a new form (Ticket)
      */
     private void openForm(GenericComponentInteractionCreateEvent event) {
-        BotUtils.getCategory("ccRegister").createTextChannel(event.getUser().getName()).queue((textChannel) -> {
+        BotUtils.getCategory("ccRegister").createTextChannel(event.getMember().getEffectiveName()).queue((textChannel) -> {
             //  Add user to channel
             textChannel.putPermissionOverride(Objects.requireNonNull(event.getMember())).setAllow(Permission.VIEW_CHANNEL).queue();
             //  Notify user of channel creation
             BotUtils.reply(event, "profileReg.formOpenConfirm", Collections.singletonMap("#channel", textChannel.getAsMention()));
+            if (RegistrationManager.exists(event.getUser().getIdLong())) RegistrationManager.delete(event.getUser().getIdLong());
             Registration registration = new Registration(event.getMember().getIdLong(), textChannel.getIdLong());
             RegistrationManager.save(registration);
             Main.getJDA().getTextChannelById(textChannel.getIdLong()).sendTyping().queue();

@@ -24,7 +24,7 @@ public class Registration {
     private UUID uuid;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private long discordId;
-    private long registerChannelId;
+    private long channelId;
     private String step;
     private MorphiaReference<ArrayList<StepInput>> inputs;
     private long formId;
@@ -32,9 +32,9 @@ public class Registration {
 
     public Registration() {}
 
-    public Registration(long discordId, long registerChannelId) {
+    public Registration(long discordId, long channelId) {
         this.discordId = discordId;
-        this.registerChannelId = registerChannelId;
+        this.channelId = channelId;
         this.step = "Start";
     }
 
@@ -63,7 +63,7 @@ public class Registration {
     }
 
     public TextChannel getChannel() {
-        return Main.getJDA().getTextChannelById(registerChannelId);
+        return Main.getJDA().getTextChannelById(channelId);
     }
 
     public String getStep() {

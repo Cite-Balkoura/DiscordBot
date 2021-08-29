@@ -37,11 +37,24 @@
       "cEvent" : 0,
       "rAdmin": 0,
       "rProfile" : 0,
-      "rWaiting" : 0
+      "rWaiting" : 0,
+      "rBan": 0,
+      "rMute": 0
     },
     "msg": {
       "cantMp" : "Hey @mention, I can't dm you",
       "noPerm": "Sorry, you don't have this permission",
+      "joinGuild": {
+        "renameList": [
+          "Arachnoid",
+          "Banjo",
+          "Unicorn"
+        ],
+        "greetings": [
+          "<name> is joining us today :)",
+          "Hey <name> ! Welcome !"
+        ]
+      },
       "joinEvent": {
         "joinEvent" : "Thank to join the event <EVENT_NAME>",
         "joinEventDescription" : "Event description: ",

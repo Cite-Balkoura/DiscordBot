@@ -16,6 +16,10 @@ public class Tools {
                 .orElse(str);
     }
 
+    public static boolean isAlphaNumericExtended(String str) {
+        return str != null && str.matches("^[a-zA-Z0-9\\s\\(\\)\\_\\-]*$");
+    }
+
     public static String getString(int number) {
         switch (number) {
             case 1: {

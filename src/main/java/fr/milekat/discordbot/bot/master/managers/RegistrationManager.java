@@ -54,6 +54,15 @@ public class RegistrationManager {
     }
 
     /**
+     * Reset a registration
+     */
+    public static void delete(long discordId) {
+        DATASTORE.find(Registration.class)
+                .filter(Filters.eq("discordId", discordId))
+                .delete();
+    }
+
+    /**
      * Check if Registration exist
      */
     public static boolean exists(Long discordId) {

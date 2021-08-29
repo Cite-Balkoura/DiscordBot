@@ -2,18 +2,19 @@ package fr.milekat.discordbot.bot.master.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Indexed;
+import dev.morphia.mapping.experimental.MorphiaReference;
+import fr.milekat.discordbot.Main;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Entity(value = "ban")
 public class Ban {
     @Id
     private ObjectId id;
-    @Indexed
-    private UUID uuid;
+    private MorphiaReference<Profile> profile;
+    private Long channelId;
     private Date banDate;
     private Date pardonDate;
     private String reasonBan;
@@ -21,16 +22,19 @@ public class Ban {
 
     public Ban() {}
 
-    public Ban(UUID uuid, Date banDate, Date pardonDate, String reasonBan, String reasonPardon) {
-        this.uuid = uuid;
+    public Ban(Profile profile, Date banDate, String reasonBan, Date pardonDate) {
+        this.profile = MorphiaReference.wrap(profile);
         this.banDate = banDate;
-        this.pardonDate = pardonDate;
         this.reasonBan = reasonBan;
-        this.reasonPardon = reasonPardon;
+        this.pardonDate = pardonDate;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public Profile getProfile() {
+        return profile.get();
+    }
+
+    public TextChannel getChannel() {
+        return Main.getJDA().getTextChannelById(channelId);
     }
 
     public Date getBanDate() {
@@ -41,11 +45,19 @@ public class Ban {
         return pardonDate;
     }
 
+    public void setPardonDate(Date pardonDate) {
+        this.pardonDate = pardonDate;
+    }
+
     public String getReasonBan() {
         return reasonBan;
     }
 
     public String getReasonPardon() {
         return reasonPardon;
+    }
+
+    public void setReasonPardon(String reasonPardon) {
+        this.reasonPardon = reasonPardon;
     }
 }

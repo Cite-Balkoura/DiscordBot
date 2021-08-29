@@ -7,6 +7,7 @@ import fr.milekat.discordbot.core.RabbitMQ;
 import fr.milekat.discordbot.utils.DateMileKat;
 import fr.milekat.discordbot.utils.WriteLog;
 import net.dv8tion.jda.api.JDA;
+import org.slf4j.impl.SimpleLogger;
 
 import java.util.HashMap;
 
@@ -26,6 +27,7 @@ public class Main {
      * Main method
      */
     public static void main(String[] args) throws Exception {
+        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "off");
         logs = new WriteLog();
         log("Starting application..");
         Init init = new Init();

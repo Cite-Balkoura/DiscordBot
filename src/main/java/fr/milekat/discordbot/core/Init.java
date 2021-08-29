@@ -30,7 +30,6 @@ public class Init {
         Config.loadConfig();
     }
 
-
     /**
      * Load DataStores
      */
