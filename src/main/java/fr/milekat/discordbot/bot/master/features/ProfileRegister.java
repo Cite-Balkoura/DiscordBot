@@ -64,6 +64,7 @@ public class ProfileRegister extends ListenerAdapter {
      */
     @Override
     public void onSlashCommand(@Nonnull SlashCommandEvent event) {
+        if (event.getUser().isBot() || !event.getGuild().equals(BotUtils.getGuild())) return;
         if (!event.getName().equalsIgnoreCase("register")) return;
         if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
             event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
@@ -233,7 +234,7 @@ public class ProfileRegister extends ListenerAdapter {
             if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Receive step: " + step.getName());
             switch (step.getType()) {
                 case TEXT -> {
-                    if (message==null) return;
+                    if (message == null) return;
                     if (step.getMin() <= message.getContentRaw().length() && step.getMax() >= message.getContentRaw().length()) {
                         if (step.getName().equalsIgnoreCase("Pseudo Mc")) { //  Username exception
                             if (ProfileManager.exists(message.getContentRaw())) {
@@ -262,7 +263,7 @@ public class ProfileRegister extends ListenerAdapter {
                     }
                 }
                 case VALID -> {
-                    if (button==null || button.getId()==null || button.getEmoji()==null) return;
+                    if (button == null || button.getId() == null || button.getEmoji() == null) return;
                     message.editMessageComponents().setActionRows().queue();
                     if (button.getId().equalsIgnoreCase("yes")) {
                         event.reply(button.getEmoji().getAsMention() + step.getYes()).queue();
@@ -276,7 +277,7 @@ public class ProfileRegister extends ListenerAdapter {
                     }
                 }
                 case CHOICES -> {
-                    if (selection==null || selection.getSelectedOptions()==null) return;
+                    if (selection == null || selection.getSelectedOptions() == null) return;
                     message.editMessageComponents().setActionRows().queue();
                     String choices = selection.getSelectedOptions()
                             .stream()
@@ -287,7 +288,7 @@ public class ProfileRegister extends ListenerAdapter {
                     if (step.isSave()) registration.addInputs(new StepInput(step, choices));
                 }
                 case FINAL -> {
-                    if (button==null || button.getId()==null || button.getEmoji()==null) return;
+                    if (button == null || button.getId() == null || button.getEmoji() == null) return;
                     message.editMessageComponents().setActionRows().queue();
                     if (button.getId().equalsIgnoreCase("yes")) {
                         BotUtils.getChannel("cStaffValidation")
@@ -317,7 +318,8 @@ public class ProfileRegister extends ListenerAdapter {
                     formStepSend(member, registration);
                 }
             }, 1000L);
-        } else {
+        } else if (!registration.getStep().equalsIgnoreCase("DONE")
+                && !registration.getStep().equalsIgnoreCase("WAITING")) {
             BotUtils.registerAdminAssist(member, "Data error ?");
         }
     }
@@ -346,16 +348,16 @@ public class ProfileRegister extends ListenerAdapter {
                         .collect(Collectors.joining("\n")),
                 true);
         message.suppressEmbeds(false).queue(unused -> message.editMessageEmbeds(embedBuilder.build()).queue(msg -> {
-            if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 5 ||
+            if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 3 ||
                     (button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
                         Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
                 ).queue();
                 BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
+                    BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
+                    BotUtils.getGuild().removeRoleFromMember(target, BotUtils.getRole("rWaiting")).queue();
                     if (BotUtils.getGuild().getSelfMember().canInteract(target)) {
                         BotUtils.getGuild().modifyNickname(target, registration.getUsername()).queue();
-                        BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
-                        BotUtils.getGuild().removeRoleFromMember(target, BotUtils.getRole("rWaiting")).queue();
                     }
                 });
                 registration.setStep("DONE");
@@ -364,7 +366,7 @@ public class ProfileRegister extends ListenerAdapter {
                 BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
                 if (Main.DEBUG_ERROR) Main.log("[" + registration.getUsername() + "] Register validated");
-            } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 5 ||
+            } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 3 ||
                     (!button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
                         Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)

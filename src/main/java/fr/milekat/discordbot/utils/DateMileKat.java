@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * Simple personal lib to format my dates
  */
 public class DateMileKat {
-    private static final Pattern periodPattern = Pattern.compile("([0-9]+)([smhj])");
+    private static final Pattern periodPattern = Pattern.compile("([0-9]+)([smhjd])");
     private static final DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private static final DateFormat dfsys = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
@@ -40,19 +40,19 @@ public class DateMileKat {
      * @param date joueur
      */
     public static String reamingToString(Date date) {
-        HashMap<String, String> reamingMute = DateMileKat.getReamingTime(date, new Date());
+        HashMap<String, String> reamingTime = DateMileKat.getReamingTime(date, new Date());
         String time = "";
-        if (!reamingMute.get("D").equals("0")) {
-            time = reamingMute.get("D") + "jours ";
+        if (!reamingTime.get("D").equals("0")) {
+            time = reamingTime.get("D") + "jours ";
         }
-        if (!reamingMute.get("h").equals("0")) {
-            time = time + reamingMute.get("h") + "h ";
+        if (!reamingTime.get("h").equals("0")) {
+            time = time + reamingTime.get("h") + "h ";
         }
-        if (!reamingMute.get("m").equals("0")) {
-            time = time + reamingMute.get("m") + "m ";
+        if (!reamingTime.get("m").equals("0")) {
+            time = time + reamingTime.get("m") + "m ";
         }
-        if (!reamingMute.get("s").equals("0")) {
-            time = time + reamingMute.get("s") + "s ";
+        if (!reamingTime.get("s").equals("0")) {
+            time = time + reamingTime.get("s") + "s ";
         }
         return Tools.remLastChar(time);
     }
@@ -76,32 +76,21 @@ public class DateMileKat {
     }
 
     /**
-     * Convertir les 4j5h9m3s en duration
-     *
-     * @param period String à transformer en duration
-     * @return duration
+     * Convert 4j5h9m3s in duration
+     * @param period String to transform
      */
     public static Long parsePeriod(String period) {
         if (period == null) return null;
-        period = period.toLowerCase(Locale.ENGLISH);
+        period = period.toLowerCase(Locale.ROOT);
         Matcher matcher = periodPattern.matcher(period);
         Instant instant = Instant.EPOCH;
         while (matcher.find()) {
             int num = Integer.parseInt(matcher.group(1));
-            String typ = matcher.group(2);
-            switch (typ) {
-                case "j":
-                    instant = instant.plus(Duration.ofDays(num));
-                    break;
-                case "h":
-                    instant = instant.plus(Duration.ofHours(num));
-                    break;
-                case "m":
-                    instant = instant.plus(Duration.ofMinutes(num));
-                    break;
-                case "s":
-                    instant = instant.plus(Duration.ofSeconds(num));
-                    break;
+            switch (matcher.group(2)) {
+                case "d", "j" -> instant = instant.plus(Duration.ofDays(num));
+                case "h" -> instant = instant.plus(Duration.ofHours(num));
+                case "m" -> instant = instant.plus(Duration.ofMinutes(num));
+                case "s" -> instant = instant.plus(Duration.ofSeconds(num));
             }
         }
         return instant.toEpochMilli();

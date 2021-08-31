@@ -4,32 +4,26 @@ import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.master.classes.Mute;
+import fr.milekat.discordbot.bot.master.classes.Profile;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class MuteManager {
     private static final Datastore DATASTORE = Main.getDatastore("master");
 
     /**
-     * Check if user is currently banned
+     * Check if user is currently muted
      */
-    public static boolean isMuted(Long discordId) {
+    public static boolean isMuted(Profile profile) {
         return DATASTORE.find(Mute.class)
-                .filter(Filters.and(Filters.eq("discordId", discordId),
-                        Filters.gte("muteDate", new Date()),
-                        Filters.lte("pardonDate", new Date())))
-                .first()!=null;
+                .filter(Filters.and(Filters.lte("muteDate", new Date()), Filters.gte("pardonDate", new Date())))
+                .stream().anyMatch(mute -> mute.getProfile().getId().equals(profile.getId()));
     }
 
     /**
-     * Get mutes for this user
+     * Save a mute
      */
-    public static ArrayList<Mute> getCurrentMutes(Long discordId) {
-        return new ArrayList<>(DATASTORE.find(Mute.class)
-                .filter(Filters.and(Filters.eq("discordId", discordId),
-                        Filters.gte("muteDate", new Date()),
-                        Filters.lte("pardonDate", new Date())))
-                .iterator().toList());
+    public static void save(Mute mute) {
+        DATASTORE.save(mute);
     }
 }

@@ -16,17 +16,26 @@ public class Ban {
     private MorphiaReference<Profile> profile;
     private Long channelId;
     private Date banDate;
+    private Date lastUpdate;
     private Date pardonDate;
     private String reasonBan;
     private String reasonPardon;
 
     public Ban() {}
 
-    public Ban(Profile profile, Date banDate, String reasonBan, Date pardonDate) {
+    public Ban(Profile profile, Date banDate, Date pardonDate, String reasonBan) {
         this.profile = MorphiaReference.wrap(profile);
         this.banDate = banDate;
-        this.reasonBan = reasonBan;
         this.pardonDate = pardonDate;
+        this.reasonBan = reasonBan;
+    }
+
+    public Ban(Profile profile, Date banDate, Date pardonDate, String reasonBan, TextChannel textChannel) {
+        this.profile = MorphiaReference.wrap(profile);
+        this.banDate = banDate;
+        this.pardonDate = pardonDate;
+        this.reasonBan = reasonBan;
+        this.channelId = textChannel.getIdLong();
     }
 
     public Profile getProfile() {
@@ -37,16 +46,28 @@ public class Ban {
         return Main.getJDA().getTextChannelById(channelId);
     }
 
+    public Ban setChannel(TextChannel channel) {
+        this.lastUpdate = new Date();
+        this.channelId = channel.getIdLong();
+        return this;
+    }
+
     public Date getBanDate() {
         return banDate;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
     }
 
     public Date getPardonDate() {
         return pardonDate;
     }
 
-    public void setPardonDate(Date pardonDate) {
+    public Ban setPardonDate(Date pardonDate) {
+        this.lastUpdate = new Date();
         this.pardonDate = pardonDate;
+        return this;
     }
 
     public String getReasonBan() {
@@ -55,9 +76,5 @@ public class Ban {
 
     public String getReasonPardon() {
         return reasonPardon;
-    }
-
-    public void setReasonPardon(String reasonPardon) {
-        this.reasonPardon = reasonPardon;
     }
 }

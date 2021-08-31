@@ -37,6 +37,10 @@ public class Profile {
         this.participating = participating;
     }
 
+    public ObjectId getId() {
+        return id;
+    }
+
     public String getUsername() {
         return username;
     }

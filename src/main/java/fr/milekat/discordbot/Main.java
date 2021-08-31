@@ -27,7 +27,7 @@ public class Main {
      * Main method
      */
     public static void main(String[] args) throws Exception {
-        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "off");
+        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "warn");
         logs = new WriteLog();
         log("Starting application..");
         Init init = new Init();

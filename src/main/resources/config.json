@@ -30,6 +30,7 @@
       "gPublic" : 0,
       "ccRegister" : 0,
       "cGeneral" : 0,
+      "cBan" : 0,
       "cRegister" : 0,
       "cStaffValidation": 0,
       "cValidated": 0,
@@ -76,6 +77,27 @@
         "userAccepted": "Congratulation you have been accepted !",
         "userRefused": "You have been refused ! Sorry.",
         "buttonAcknowledge": "Close this channel"
+      },
+      "mute": {
+        "slashCmd": "Mute a member",
+        "slashOptDescMember": "Member to mute",
+        "slashOptDescDuration": "Mute duration (Format: 1d2h3m5s)",
+        "slashOptDescReason": "Why ?",
+        "slashDelayToLow": "Delay too low, please use more than 10s",
+        "slashNoProfile": "This member hasn't a profile yet, his now permanently mute",
+        "slashSuccess": "Mute executed !"
+      },
+      "ban": {
+        "slashBan": "Ban a member",
+        "slashOptDescMember": "Member to target",
+        "slashOptDescDuration": "Ban duration (Format: 1d2h3m5s)",
+        "slashOptDescReason": "Why ?",
+        "slashDelayToLow": "Delay too low, please use more than 10s",
+        "slashNoProfile": "This member hasn't a profile yet, nothing did",
+        "slashSuccess": "Ban executed !",
+        "informMessage" : "Hi <mention>, you have been banned because <reason> for <ban-delay> until <pardon-date>.",
+        "informUpdate" : "Hi <mention>, your ban has been updated because <reason> for <ban-delay> until <pardon-date>.",
+        "slashUnBan": "Unban a member"
       },
       "teamBuilder": {
         "slashCreateTeamDesc": "Create a new team for this event",

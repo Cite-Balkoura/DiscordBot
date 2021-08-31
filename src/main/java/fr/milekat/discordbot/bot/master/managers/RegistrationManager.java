@@ -38,18 +38,18 @@ public class RegistrationManager {
     /**
      * Check if channel is a Registration channel
      */
-    public static Registration getRegistrationByChannel(Long registerChannelId) {
+    public static Registration getRegistrationByChannel(Long channelId) {
         return DATASTORE.find(Registration.class)
-                .filter(Filters.eq("registerChannelId", registerChannelId))
+                .filter(Filters.eq("channelId", channelId))
                 .first();
     }
 
     /**
      * Check if channel is a Registration channel
      */
-    public static boolean isRegistration(Long registerChannelId) {
+    public static boolean isRegistration(Long channelId) {
         return DATASTORE.find(Registration.class)
-                .filter(Filters.eq("registerChannelId", registerChannelId))
+                .filter(Filters.eq("channelId", channelId))
                 .first()!=null;
     }
 
