@@ -2,6 +2,7 @@ package fr.milekat.discordbot.bot.master.features.Moderation;
 
 import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.master.classes.Mute;
+import fr.milekat.discordbot.bot.master.classes.Profile;
 import fr.milekat.discordbot.bot.master.managers.MuteManager;
 import fr.milekat.discordbot.bot.master.managers.ProfileManager;
 import fr.milekat.discordbot.utils.DateMileKat;
@@ -16,8 +17,8 @@ import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-public class MuteCommand extends ListenerAdapter {
-    public MuteCommand() {
+public class MuteFeature extends ListenerAdapter {
+    public MuteFeature() {
         BotUtils.getGuild().upsertCommand(
                 new CommandData("mute", BotUtils.getMsg("mute.slashCmd"))
                         .addOptions(new OptionData(OptionType.USER,
@@ -50,7 +51,6 @@ public class MuteCommand extends ListenerAdapter {
         //  Check if target has a profile
         if (!ProfileManager.exists(event.getOption("member").getAsMember().getIdLong())) {
             event.reply(BotUtils.getMsg("mute.slashNoProfile")).setEphemeral(true).queue();
-            BotUtils.getGuild().addRoleToMember(targetMember, BotUtils.getRole("rMute")).queue();
             return;
         }
         long muteDelay = DateMileKat.parsePeriod(event.getOption("duration").getAsString()) + new Date().getTime();
@@ -59,11 +59,16 @@ public class MuteCommand extends ListenerAdapter {
             event.reply(BotUtils.getMsg("mute.slashDelayToLow")).setEphemeral(true).queue();
             return;
         }
-        MuteManager.save(new Mute(ProfileManager.getProfile(event.getOption("member").getAsMember().getIdLong()),
-                new Date(),
-                new Date(muteDelay),
-                event.getOption("reason").getAsString()));
+        String reason = event.getOption("reason").getAsString();
         BotUtils.getGuild().addRoleToMember(targetMember, BotUtils.getRole("rMute")).queue();
+        Profile targetProfile = ProfileManager.getProfile(targetMember.getIdLong());
+        if (MuteManager.isMuted(targetProfile)) {
+            Mute oldMute = MuteManager.getLastMute(targetProfile);
+            MuteManager.save(oldMute.setAcknowledge(true));
+            MuteManager.save(new Mute(oldMute.getProfile(), oldMute.getMuteDate(), new Date(muteDelay), reason));
+        } else {
+            MuteManager.save(new Mute(targetProfile, new Date(), new Date(muteDelay), reason));
+        }
         event.reply(BotUtils.getMsg("mute.slashSuccess")).setEphemeral(true).queue();
     }
 }

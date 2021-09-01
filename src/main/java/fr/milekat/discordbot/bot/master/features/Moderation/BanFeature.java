@@ -6,9 +6,9 @@ import fr.milekat.discordbot.bot.master.classes.Profile;
 import fr.milekat.discordbot.bot.master.managers.BanManager;
 import fr.milekat.discordbot.bot.master.managers.ProfileManager;
 import fr.milekat.discordbot.utils.DateMileKat;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -18,8 +18,8 @@ import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-public class BanCommand extends ListenerAdapter {
-    public BanCommand() {
+public class BanFeature extends ListenerAdapter {
+    public BanFeature() {
         BotUtils.getGuild().upsertCommand(new CommandData("ban", BotUtils.getMsg("ban.slashBan"))
                 .addOptions(new OptionData(OptionType.USER,
                                 "member",
@@ -39,6 +39,9 @@ public class BanCommand extends ListenerAdapter {
         ).queue());
     }
 
+    /**
+     * /ban command
+     */
     @Override
     public void onSlashCommand(@Nonnull SlashCommandEvent event) {
         if (event.getUser().isBot() || !event.getGuild().equals(BotUtils.getGuild())) return;
@@ -51,7 +54,7 @@ public class BanCommand extends ListenerAdapter {
         //  Check if target has a profile
         if (!ProfileManager.exists(targetMember.getIdLong())) {
             event.reply(BotUtils.getMsg("ban.slashNoProfile")).setEphemeral(true).queue();
-            BotUtils.getGuild().addRoleToMember(targetMember, BotUtils.getRole("rMute")).queue();
+            BotUtils.getGuild().addRoleToMember(targetMember, BotUtils.getRole("rBan")).queue();
             return;
         }
         long banDelay = DateMileKat.parsePeriod(event.getOption("duration").getAsString()) + new Date().getTime();
@@ -61,44 +64,39 @@ public class BanCommand extends ListenerAdapter {
             return;
         }
         String reason = event.getOption("reason").getAsString();
+        BotUtils.getGuild().removeRoleFromMember(targetMember, BotUtils.getRole("rProfile")).queue();
         BotUtils.getGuild().addRoleToMember(targetMember, BotUtils.getRole("rBan")).queue();
         Profile targetProfile = ProfileManager.getProfile(targetMember.getIdLong());
         if (BanManager.isBanned(targetProfile)) {
             Ban oldBan = BanManager.getLastBan(targetProfile);
-            Ban newBan = new Ban(oldBan.getProfile(), oldBan.getBanDate(), new Date(banDelay), reason);
+            Ban updatedBan = new Ban(oldBan.getProfile(), oldBan.getBanDate(), new Date(banDelay), reason);
             if (oldBan.getChannel()!=null && !BotUtils.getGuild().getTextChannels().contains(oldBan.getChannel())) {
-                sendBan(targetMember, newBan);
+                BanUtils.sendBan(targetMember, updatedBan);
             } else {
-                newBan.setChannel(oldBan.getChannel());
+                updatedBan.setChannel(oldBan.getChannel());
                 oldBan.getChannel().sendMessage(BotUtils.getMsg("ban.informUpdate")
                         .replaceAll("<mention>", targetMember.getAsMention())
-                        .replaceAll("<reason>", newBan.getReasonBan())
-                        .replaceAll("<ban-delay>", DateMileKat.reamingToString(newBan.getPardonDate()))
-                        .replaceAll("<pardon-date>", DateMileKat.getDate(newBan.getPardonDate()))
+                        .replaceAll("<reason>", updatedBan.getReasonBan())
+                        .replaceAll("<ban-delay>", DateMileKat.reamingToString(updatedBan.getPardonDate()))
+                        .replaceAll("<pardon-date>", DateMileKat.getDate(updatedBan.getPardonDate()))
                 ).queue();
             }
-            BanManager.save(newBan);
+            BanManager.save(oldBan.setAcknowledge(true));
+            BanManager.save(updatedBan);
         } else {
-            Ban newBan = new Ban(targetProfile, new Date(), new Date(banDelay), reason);
-            sendBan(targetMember, newBan);
+            BanUtils.sendBan(targetMember, new Ban(targetProfile, new Date(), new Date(banDelay), reason));
         }
         event.reply(BotUtils.getMsg("ban.slashSuccess")).setEphemeral(true).queue();
     }
 
     /**
-     * Create channel, update
+     * Log ban channels messages
      */
-    public void sendBan(@Nonnull Member member, Ban ban) {
-        BotUtils.getGuild().createTextChannel("ban-" + member.getEffectiveName(), BotUtils.getCategory("cBan"))
-                .queue(textChannel -> {
-                    BanManager.save(BanManager.getLastBan(ban.getProfile()).setChannel(textChannel));
-                    textChannel.putPermissionOverride(member).setAllow(Permission.VIEW_CHANNEL).queue();
-                    textChannel.sendMessage(BotUtils.getMsg("ban.informMessage")
-                            .replaceAll("<mention>", member.getAsMention())
-                            .replaceAll("<reason>", ban.getReasonBan())
-                            .replaceAll("<ban-delay>", DateMileKat.reamingToString(ban.getPardonDate()))
-                            .replaceAll("<pardon-date>", DateMileKat.getDate(ban.getPardonDate()))
-                    ).queue();
-                });
+    @Override
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (!event.getGuild().equals(BotUtils.getGuild())) return;
+        if (!event.getChannel().getName().contains("ban-")) return;
+        BotUtils.getChannel("cBanLogs").sendMessage(event.getChannel().getName() + "\n" +
+                event.getMember().getAsMention() + " **»** " + event.getMessage().getContentRaw()).queue();
     }
 }

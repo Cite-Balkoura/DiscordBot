@@ -20,6 +20,7 @@ public class Ban {
     private Date pardonDate;
     private String reasonBan;
     private String reasonPardon;
+    private Boolean acknowledge;
 
     public Ban() {}
 
@@ -28,14 +29,8 @@ public class Ban {
         this.banDate = banDate;
         this.pardonDate = pardonDate;
         this.reasonBan = reasonBan;
-    }
-
-    public Ban(Profile profile, Date banDate, Date pardonDate, String reasonBan, TextChannel textChannel) {
-        this.profile = MorphiaReference.wrap(profile);
-        this.banDate = banDate;
-        this.pardonDate = pardonDate;
-        this.reasonBan = reasonBan;
-        this.channelId = textChannel.getIdLong();
+        this.lastUpdate = new Date();
+        this.acknowledge = false;
     }
 
     public Profile getProfile() {
@@ -64,17 +59,23 @@ public class Ban {
         return pardonDate;
     }
 
-    public Ban setPardonDate(Date pardonDate) {
-        this.lastUpdate = new Date();
-        this.pardonDate = pardonDate;
-        return this;
-    }
-
     public String getReasonBan() {
         return reasonBan;
     }
 
     public String getReasonPardon() {
         return reasonPardon;
+    }
+
+    public Ban setReasonPardon(String reasonPardon) {
+        this.lastUpdate = new Date();
+        this.reasonPardon = reasonPardon;
+        return this;
+    }
+
+    public Ban setAcknowledge(Boolean acknowledge) {
+        this.lastUpdate = new Date();
+        this.acknowledge = acknowledge;
+        return this;
     }
 }

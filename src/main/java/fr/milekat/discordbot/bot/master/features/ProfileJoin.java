@@ -32,6 +32,7 @@ public class ProfileJoin extends ListenerAdapter {
             }
             /* If member is ban, add user to his ban channel(s) and add role */
             if (BanManager.isBanned(profile)) {
+                BotUtils.getGuild().removeRoleFromMember(event.getMember(), BotUtils.getRole("rProfile")).queue();
                 BotUtils.getGuild().addRoleToMember(event.getMember(), BotUtils.getRole("rBan")).queue();
                 Ban ban = BanManager.getLastBan(profile);
                 ban.getChannel().putPermissionOverride(event.getMember()).setAllow(Permission.VIEW_CHANNEL).queue();

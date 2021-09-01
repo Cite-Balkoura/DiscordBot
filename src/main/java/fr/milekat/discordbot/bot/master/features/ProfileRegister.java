@@ -129,7 +129,7 @@ public class ProfileRegister extends ListenerAdapter {
         } else if (RegistrationManager.isRegistration(event.getTextChannel().getIdLong())) {
             Registration registration = RegistrationManager.getRegistration(Objects.requireNonNull(event.getMember()).getIdLong());
             if (registration==null || !event.getChannel().equals(registration.getChannel())) return;
-            if (event.getButton().getId().equalsIgnoreCase("acknowledge")) {
+            if (event.getButton().getId().equalsIgnoreCase("regAcknowledge")) {
                 event.reply("bey").setEphemeral(true).queue();
                 registration.getChannel().delete().reason("Remove button click by " + event.getUser().getAsTag()).queue();
             } else {
@@ -351,7 +351,7 @@ public class ProfileRegister extends ListenerAdapter {
             if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 3 ||
                     (button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
-                        Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                        Button.success("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
                 ).queue();
                 BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
                     BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
@@ -369,7 +369,7 @@ public class ProfileRegister extends ListenerAdapter {
             } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 3 ||
                     (!button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
-                        Button.success("acknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                        Button.success("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
                 ).queue();
                 BotUtils.getChannel("cRejected").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();

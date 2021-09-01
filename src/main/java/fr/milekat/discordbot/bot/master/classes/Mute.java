@@ -3,8 +3,6 @@ package fr.milekat.discordbot.bot.master.classes;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.mapping.experimental.MorphiaReference;
-import fr.milekat.discordbot.Main;
-import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -14,11 +12,12 @@ public class Mute {
     @Id
     private ObjectId id;
     private MorphiaReference<Profile> profile;
-    private Long channelId;
     private Date muteDate;
+    private Date lastUpdate;
     private Date pardonDate;
     private String reasonMute;
     private String reasonPardon;
+    private Boolean acknowledge;
 
     public Mute() {}
 
@@ -27,26 +26,24 @@ public class Mute {
         this.muteDate = muteDate;
         this.pardonDate = pardonDate;
         this.reasonMute = reasonMute;
+        this.lastUpdate = new Date();
+        this.acknowledge = false;
     }
 
     public Profile getProfile() {
         return profile.get();
     }
 
-    public TextChannel getChannel() {
-        return Main.getJDA().getTextChannelById(channelId);
-    }
-
     public Date getMuteDate() {
         return muteDate;
     }
 
-    public Date getPardonDate() {
-        return pardonDate;
+    public Date getLastUpdate() {
+        return lastUpdate;
     }
 
-    public void setPardonDate(Date pardonDate) {
-        this.pardonDate = pardonDate;
+    public Date getPardonDate() {
+        return pardonDate;
     }
 
     public String getReasonMute() {
@@ -57,7 +54,15 @@ public class Mute {
         return reasonPardon;
     }
 
-    public void setReasonPardon(String reasonPardon) {
+    public Mute setReasonPardon(String reasonPardon) {
+        this.lastUpdate = new Date();
         this.reasonPardon = reasonPardon;
+        return this;
+    }
+
+    public Mute setAcknowledge(Boolean acknowledge) {
+        this.lastUpdate = new Date();
+        this.acknowledge = acknowledge;
+        return this;
     }
 }

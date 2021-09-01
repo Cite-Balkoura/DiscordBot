@@ -30,7 +30,8 @@
       "gPublic" : 0,
       "ccRegister" : 0,
       "cGeneral" : 0,
-      "cBan" : 0,
+      "ccBan" : 0,
+      "cBanLogs" : 0,
       "cRegister" : 0,
       "cStaffValidation": 0,
       "cValidated": 0,
@@ -84,8 +85,11 @@
         "slashOptDescDuration": "Mute duration (Format: 1d2h3m5s)",
         "slashOptDescReason": "Why ?",
         "slashDelayToLow": "Delay too low, please use more than 10s",
-        "slashNoProfile": "This member hasn't a profile yet, his now permanently mute",
-        "slashSuccess": "Mute executed !"
+        "slashNoProfile": "This member hasn't a profile yet",
+        "slashSuccess": "Command success !",
+        "slashUnMute": "Unmute a member",
+        "expired": "Delay passed",
+        "notMuted": "Member not muted"
       },
       "ban": {
         "slashBan": "Ban a member",
@@ -93,11 +97,15 @@
         "slashOptDescDuration": "Ban duration (Format: 1d2h3m5s)",
         "slashOptDescReason": "Why ?",
         "slashDelayToLow": "Delay too low, please use more than 10s",
-        "slashNoProfile": "This member hasn't a profile yet, nothing did",
-        "slashSuccess": "Ban executed !",
+        "slashNoProfile": "This member hasn't a profile yet",
+        "slashSuccess": "Command success !",
         "informMessage" : "Hi <mention>, you have been banned because <reason> for <ban-delay> until <pardon-date>.",
         "informUpdate" : "Hi <mention>, your ban has been updated because <reason> for <ban-delay> until <pardon-date>.",
-        "slashUnBan": "Unban a member"
+        "slashUnBan": "Unban a member",
+        "notBanned": "Member not banned",
+        "unBanNotify": "You have been unbanned because <reason>, you can close this channel",
+        "buttonAcknowledge": "Close this channel",
+        "expired": "Delay passed"
       },
       "teamBuilder": {
         "slashCreateTeamDesc": "Create a new team for this event",
