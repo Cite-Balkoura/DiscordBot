@@ -17,7 +17,7 @@ public class Config {
     public static JSONObject loadConfig() throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject configs = (JSONObject) jsonParser.parse(new FileReader("config.json"));
-        Main.DEBUG_ERROR = (boolean) ((JSONObject) configs.get("config")).get("debugError");
+        Main.DEBUG_ERRORS = (boolean) ((JSONObject) configs.get("config")).get("debugError");
         Main.DEBUG_RABBIT = (boolean) ((JSONObject) configs.get("config")).get("debugRabbitMQ");
         Main.MODE_DEV = (boolean) ((JSONObject) configs.get("config")).get("devMode");
         return configs;

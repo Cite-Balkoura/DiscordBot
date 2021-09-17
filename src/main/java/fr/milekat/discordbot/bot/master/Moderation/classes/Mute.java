@@ -1,8 +1,9 @@
-package fr.milekat.discordbot.bot.master.classes;
+package fr.milekat.discordbot.bot.master.Moderation.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.mapping.experimental.MorphiaReference;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -44,6 +45,11 @@ public class Mute {
 
     public Date getPardonDate() {
         return pardonDate;
+    }
+
+    public Mute setPardonDate(Date pardonDate) {
+        this.pardonDate = pardonDate;
+        return this;
     }
 
     public String getReasonMute() {

@@ -1,14 +1,13 @@
-package fr.milekat.discordbot.bot.master.features;
+package fr.milekat.discordbot.bot.master.core.features;
 
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.classes.Ban;
-import fr.milekat.discordbot.bot.master.classes.Profile;
-import fr.milekat.discordbot.bot.master.classes.Registration;
-import fr.milekat.discordbot.bot.master.managers.BanManager;
-import fr.milekat.discordbot.bot.master.managers.MuteManager;
-import fr.milekat.discordbot.bot.master.managers.ProfileManager;
-import fr.milekat.discordbot.bot.master.managers.RegistrationManager;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Ban;
+import fr.milekat.discordbot.bot.master.Moderation.managers.BanManager;
+import fr.milekat.discordbot.bot.master.Moderation.managers.MuteManager;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
 import fr.milekat.discordbot.utils.Config;
 import fr.milekat.discordbot.utils.Tools;
 import net.dv8tion.jda.api.Permission;

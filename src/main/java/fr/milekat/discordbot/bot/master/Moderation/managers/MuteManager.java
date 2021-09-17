@@ -1,14 +1,15 @@
-package fr.milekat.discordbot.bot.master.managers;
+package fr.milekat.discordbot.bot.master.Moderation.managers;
 
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.classes.Mute;
-import fr.milekat.discordbot.bot.master.classes.Profile;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Mute;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class MuteManager {
     private static final Datastore DATASTORE = Main.getDatastore("master");
@@ -18,14 +19,15 @@ public class MuteManager {
      */
     public static boolean isMuted(Profile profile) {
         return DATASTORE.find(Mute.class).filter(Filters.eq("acknowledge", false)).iterator().toList().
-                stream().anyMatch(ban -> ban.getProfile().getId().equals(profile.getId()));
+                stream().anyMatch(mute -> mute.getProfile().getId().equals(profile.getId()));
     }
 
     /**
      * Get last mute of this profile
      */
     public static Mute getLastMute(Profile profile) throws NoSuchElementException {
-        return getMutes(profile).stream().max(Comparator.comparing(Mute::getLastUpdate)).get();
+        Optional<Mute> optionalMute = getMutes(profile).stream().max(Comparator.comparing(Mute::getLastUpdate));
+        return optionalMute.orElse(null);
     }
 
     /**
@@ -33,7 +35,7 @@ public class MuteManager {
      */
     public static ArrayList<Mute> getMutes(Profile profile) {
         return new ArrayList<>(DATASTORE.find(Mute.class).filter(Filters.eq("acknowledge", false)).iterator().toList().
-                stream().filter(ban -> ban.getProfile().getId().equals(profile.getId())).toList());
+                stream().filter(mute -> mute.getProfile().getId().equals(profile.getId())).toList());
     }
 
     /**

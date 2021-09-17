@@ -7,47 +7,82 @@ import com.rabbitmq.client.DeliverCallback;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.utils.Config;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 public class RabbitMQ {
-    private static Connection CONNECTION = null;
     private static final JSONObject RABBIT_CONFIG = (JSONObject) ((JSONObject) Config.getConfig().get("data")).get("rabbitMQ");
+    private static final JSONObject CONSUMER = (JSONObject) RABBIT_CONFIG.get("consumer");
+    private static final JSONObject PUBLISHER = (JSONObject) RABBIT_CONFIG.get("publisher");
+
+    public RabbitMQ() {
+        try {
+            Channel channel = getConnection().createChannel();
+            channel.exchangeDeclare((String) RABBIT_CONFIG.get("exchange"), "direct");
+            channel.queueDeclare((String) CONSUMER.get("queue"),
+                    false, false, false, null);
+            channel.queueBind((String) CONSUMER.get("queue"),
+                    (String) RABBIT_CONFIG.get("exchange"),
+                    (String) CONSUMER.get("routingKey"));
+            channel.queueDeclare((String) PUBLISHER.get("queue"),
+                    false, false, false, null);
+            channel.queueBind((String) PUBLISHER.get("queue"),
+                    (String) RABBIT_CONFIG.get("exchange"),
+                    (String) PUBLISHER.get("routingKey"));
+            channel.close();
+            getConnection().close();
+        } catch (IOException | TimeoutException exception) {
+            exception.printStackTrace();
+        }
+    }
 
     /**
      * Init/Get RabbitMQ Connection
      */
-    private static Connection getConnection() {
-        if (CONNECTION == null) {
-            try {
-                ConnectionFactory connectionFactory = new ConnectionFactory();
-                connectionFactory.setHost((String)  RABBIT_CONFIG.get("host"));
-                connectionFactory.setPort(((Long) RABBIT_CONFIG.get("port")).intValue());
-                connectionFactory.setUsername((String) RABBIT_CONFIG.get("user"));
-                connectionFactory.setPassword((String) RABBIT_CONFIG.get("password"));
-                CONNECTION = connectionFactory.newConnection();
-            } catch (IOException | TimeoutException e) {
-                e.printStackTrace();
-            }
-        }
-        return CONNECTION;
+    private static Connection getConnection() throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost((String)  RABBIT_CONFIG.get("host"));
+        connectionFactory.setPort(((Long) RABBIT_CONFIG.get("port")).intValue());
+        connectionFactory.setUsername((String) RABBIT_CONFIG.get("user"));
+        connectionFactory.setPassword((String) RABBIT_CONFIG.get("password"));
+        return connectionFactory.newConnection();
     }
 
     /**
      * Load RABBIT_CONFIG.get("queue") Consumer
      */
-    public Thread getRabbitConsumer() throws IOException {
-        Channel channel = getConnection().createChannel();
-        DeliverCallback deliverCallback = (consumerTag, message) -> Main.log(new String(message.getBody(), StandardCharsets.UTF_8));
+    public Thread getRabbitConsumer() {
         return new Thread(() -> {
+            try {
+                Channel channel = getConnection().createChannel();
+                DeliverCallback deliverCallback = (consumerTag, message) -> {
+                    if (Main.DEBUG_RABBIT) Main.log(new String(message.getBody(), StandardCharsets.UTF_8));
                     try {
-                        channel.basicConsume((String) RABBIT_CONFIG.get("queue"), true, deliverCallback, Main::log);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        JSONObject json = (JSONObject) new JSONParser().parse(new String(message.getBody(), StandardCharsets.UTF_8));
+                        RabbitMQReceive.MessageType messageType = RabbitMQReceive.MessageType.other;
+                        String type = (String) Optional.ofNullable(json.get("type")).orElse("other");
+                        try {
+                            messageType = RabbitMQReceive.MessageType.valueOf(type);
+                        } catch (IllegalArgumentException ignore) {}
+                        //  CALL HERE
+                        if (Main.DEBUG_RABBIT && messageType.equals(RabbitMQReceive.MessageType.other)) {
+                            Main.log("RabbitMQ Unknown type: " + type);
+                        }
+                        new RabbitMQReceive(messageType, json);
+                    } catch (ParseException exception) {
+                        exception.printStackTrace();
                     }
-                }, "RabbitConsumer");
+                };
+                channel.basicConsume((String) CONSUMER.get("queue"), true, deliverCallback, Main::log);
+            } catch (IOException | TimeoutException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -55,7 +90,9 @@ public class RabbitMQ {
      */
     public static void rabbitSend(String message) throws IOException, TimeoutException {
         Channel channel = getConnection().createChannel();
-        channel.basicPublish((String) RABBIT_CONFIG.get("exchange"), (String) RABBIT_CONFIG.get("routingKey"), null, message.getBytes(StandardCharsets.UTF_8));
+        channel.basicPublish((String) RABBIT_CONFIG.get("exchange"), (String) PUBLISHER.get("routingKey"), null,
+                message.getBytes(StandardCharsets.UTF_8));
         channel.close();
+        getConnection().close();
     }
 }

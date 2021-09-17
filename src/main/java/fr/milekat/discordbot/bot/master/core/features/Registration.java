@@ -1,4 +1,4 @@
-package fr.milekat.discordbot.bot.master.classes;
+package fr.milekat.discordbot.bot.master.core.features;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
@@ -6,7 +6,8 @@ import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
 import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.managers.StepInputManager;
+import fr.milekat.discordbot.bot.master.core.classes.StepInput;
+import fr.milekat.discordbot.bot.master.core.managers.StepInputManager;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 

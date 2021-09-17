@@ -7,7 +7,7 @@ import dev.morphia.annotations.Indexed;
 import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;

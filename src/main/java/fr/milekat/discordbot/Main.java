@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class Main {
     /* Core */
     private static WriteLog logs;
-    public static boolean DEBUG_ERROR = false;
+    public static boolean DEBUG_ERRORS = false;
     public static boolean MODE_DEV = false;
     /* MongoDB */
     private static HashMap<String, Datastore> datastoreMap = new HashMap<>();
@@ -41,7 +41,7 @@ public class Main {
         JDA = init.getJDA();
         new BotManager();
         //  Log
-        if (DEBUG_ERROR) log("Debugs enable");
+        if (DEBUG_ERRORS) log("Debugs enable");
         if (MODE_DEV) log("Mode dev enable");
         log("Application ready");
     }

@@ -1,8 +1,9 @@
-package fr.milekat.discordbot.bot.master.features.Moderation;
+package fr.milekat.discordbot.bot.master.Moderation.engines;
 
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.classes.Ban;
-import fr.milekat.discordbot.bot.master.managers.BanManager;
+import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Ban;
+import fr.milekat.discordbot.bot.master.Moderation.managers.BanManager;
 
 import java.util.Date;
 import java.util.Timer;
@@ -15,9 +16,8 @@ public class BanEngine {
             public void run() {
                 for (Ban ban : BanManager.getBanList()) {
                     if (ban.getPardonDate().before(new Date())) {
-                        BanManager.save(ban.setReasonPardon(BotUtils.getMsg("ban.expired")).setAcknowledge(true));
                         BotUtils.getGuild().retrieveMemberById(ban.getProfile().getDiscordId()).queue(member ->
-                                BanUtils.unBanNotify(member, ban)
+                                ModerationUtils.unBanSend(member, ban.getProfile(), BotUtils.getMsg("ban.expired"))
                         );
                     }
                 }

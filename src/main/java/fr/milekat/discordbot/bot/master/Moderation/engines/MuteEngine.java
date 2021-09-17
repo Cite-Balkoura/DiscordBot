@@ -1,8 +1,9 @@
-package fr.milekat.discordbot.bot.master.features.Moderation;
+package fr.milekat.discordbot.bot.master.Moderation.engines;
 
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.classes.Mute;
-import fr.milekat.discordbot.bot.master.managers.MuteManager;
+import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Mute;
+import fr.milekat.discordbot.bot.master.Moderation.managers.MuteManager;
 
 import java.util.Date;
 import java.util.Timer;
@@ -15,9 +16,8 @@ public class MuteEngine {
             public void run() {
                 for (Mute mute : MuteManager.getMuteList()) {
                     if (mute.getPardonDate().before(new Date())) {
-                        MuteManager.save(mute.setAcknowledge(true).setReasonPardon(BotUtils.getMsg("mute.expired")));
                         BotUtils.getGuild().retrieveMemberById(mute.getProfile().getDiscordId()).queue(member ->
-                                BotUtils.getGuild().removeRoleFromMember(member, BotUtils.getRole("rMute")).queue()
+                                ModerationUtils.unMuteSend(member, mute.getProfile(), BotUtils.getMsg("mute.expired"))
                         );
                     }
                 }

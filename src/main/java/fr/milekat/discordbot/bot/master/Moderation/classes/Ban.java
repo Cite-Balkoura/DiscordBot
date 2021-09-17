@@ -1,9 +1,10 @@
-package fr.milekat.discordbot.bot.master.classes;
+package fr.milekat.discordbot.bot.master.Moderation.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 

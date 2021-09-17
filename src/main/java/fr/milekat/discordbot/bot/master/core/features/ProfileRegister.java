@@ -1,14 +1,13 @@
-package fr.milekat.discordbot.bot.master.features;
+package fr.milekat.discordbot.bot.master.core.features;
 
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.classes.Profile;
-import fr.milekat.discordbot.bot.master.classes.Registration;
-import fr.milekat.discordbot.bot.master.classes.Step;
-import fr.milekat.discordbot.bot.master.classes.StepInput;
-import fr.milekat.discordbot.bot.master.managers.ProfileManager;
-import fr.milekat.discordbot.bot.master.managers.RegistrationManager;
-import fr.milekat.discordbot.bot.master.managers.StepManager;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Step;
+import fr.milekat.discordbot.bot.master.core.classes.StepInput;
+import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
+import fr.milekat.discordbot.bot.master.core.managers.StepManager;
 import fr.milekat.discordbot.utils.MojangNames;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -181,11 +180,11 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private void formStepSend(Member member, Registration registration) {
         if (!StepManager.exists(registration.getStep())) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Unregister step: " + registration.getStep());
+            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Unregister step: " + registration.getStep());
             return;
         }
         Step step = StepManager.getStep(registration.getStep());
-        if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Send step: " + step.getName());
+        if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Send step: " + step.getName());
         switch (step.getType()) {
             case TEXT -> registration.getChannel().sendMessageEmbeds(getMinMaxEmbed(member, step).build()).queue();
             case VALID -> {
@@ -209,7 +208,7 @@ public class ProfileRegister extends ListenerAdapter {
                 BotUtils.sendRegister(member, builder.build());
             }
             default -> {
-                if (Main.DEBUG_ERROR) Main.log("Unknown step: " + step.getType());
+                if (Main.DEBUG_ERRORS) Main.log("Unknown step: " + step.getType());
             }
         }
     }
@@ -219,19 +218,19 @@ public class ProfileRegister extends ListenerAdapter {
      */
     private void formStepReceive(Message message, Member member, Registration registration, Button button, SelectionMenuInteraction selection, GenericComponentInteractionCreateEvent event) {
         if (registration == null) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Player null");
+            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Player null");
             if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
             return;
         }
         if (registration.getDiscordId() != member.getIdLong()) {
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Id : " + registration.getDiscordId() + " / " + member.getIdLong());
+            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Id : " + registration.getDiscordId() + " / " + member.getIdLong());
             if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
             return;
         }
         if (StepManager.exists(registration.getStep())) {
             //  Player is in form register
             Step step = StepManager.getStep(registration.getStep());
-            if (Main.DEBUG_ERROR) Main.log("[" + member.getUser().getAsTag() + "] Receive step: " + step.getName());
+            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Receive step: " + step.getName());
             switch (step.getType()) {
                 case TEXT -> {
                     if (message == null) return;
@@ -247,7 +246,7 @@ public class ProfileRegister extends ListenerAdapter {
                                     if (step.isSave()) registration.addInputs(new StepInput(step, message.getContentRaw()));
                                 } catch (IOException ignored) {
                                     BotUtils.registerAdminAssist(member, "Mojang data error please retry.");
-                                    if (Main.DEBUG_ERROR) Main.log("[" + member.getAsMention() + "] Mojang data error, retry..");
+                                    if (Main.DEBUG_ERRORS) Main.log("[" + member.getAsMention() + "] Mojang data error, retry..");
                                     return;
                                 } catch (IllegalArgumentException ignored) {
                                     BotUtils.sendRegister(member, BotUtils.getMsg("profileReg.formFieldError"));
@@ -365,7 +364,7 @@ public class ProfileRegister extends ListenerAdapter {
                 ProfileManager.save(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
                 BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
-                if (Main.DEBUG_ERROR) Main.log("[" + registration.getUsername() + "] Register validated");
+                if (Main.DEBUG_ERRORS) Main.log("[" + registration.getUsername() + "] Register validated");
             } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 3 ||
                     (!button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
@@ -373,7 +372,7 @@ public class ProfileRegister extends ListenerAdapter {
                 ).queue();
                 BotUtils.getChannel("cRejected").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
-                if (Main.DEBUG_ERROR) Main.log("[" + registration.getUsername() + "] Register validated");
+                if (Main.DEBUG_ERRORS) Main.log("[" + registration.getUsername() + "] Register validated");
             }
         }));
         RegistrationManager.save(registration);

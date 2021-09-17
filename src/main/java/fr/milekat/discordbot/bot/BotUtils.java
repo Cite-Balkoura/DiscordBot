@@ -1,7 +1,7 @@
 package fr.milekat.discordbot.bot;
 
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.managers.RegistrationManager;
+import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
 import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;

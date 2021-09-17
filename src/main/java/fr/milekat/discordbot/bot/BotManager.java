@@ -15,10 +15,10 @@ public class BotManager {
             Main.log("config.json file loaded successfully");
         } catch (IOException | ParseException exception) {
             Main.log("config.json not found");
-            if (Main.DEBUG_ERROR) exception.printStackTrace();
+            if (Main.DEBUG_ERRORS) exception.printStackTrace();
         }
         new MasterManager();
         new EventsManager();
-        if (Main.DEBUG_ERROR) Main.log("Bot loaded");
+        if (Main.DEBUG_ERRORS) Main.log("Bot loaded");
     }
 }

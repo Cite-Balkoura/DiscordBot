@@ -19,8 +19,14 @@
       "user" : "minecraft",
       "password" : "admin",
       "exchange" : "minecraft",
-      "queue" : "sub-queue",
-      "routingKey" : "pub-routingKey"
+      "consumer": {
+        "queue" : "bot-input",
+        "routingKey" : "bot-input"
+      },
+      "publisher" : {
+        "queue" : "bot-output",
+        "routingKey" : "bot-output"
+      }
     }
   },
   "discord": {

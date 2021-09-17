@@ -8,6 +8,14 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import fr.milekat.discordbot.Main;
+import fr.milekat.discordbot.bot.events.classes.Event;
+import fr.milekat.discordbot.bot.events.classes.Participation;
+import fr.milekat.discordbot.bot.events.classes.Team;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Ban;
+import fr.milekat.discordbot.bot.master.Moderation.classes.Mute;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Step;
+import fr.milekat.discordbot.bot.master.core.classes.StepInput;
 import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -36,10 +44,10 @@ public class Init {
     public HashMap<String, Datastore> getDatastoreMap() {
         HashMap<String, Datastore> datastoreMap = new HashMap<>();
         for (Object dbName : ((JSONArray) ((JSONObject) ((JSONObject) Config.getConfig().get("data")).get("mongo")).get("databases"))) {
-            if (Main.DEBUG_ERROR) Main.log("[Mongo] Load db: " + dbName.toString());
+            if (Main.DEBUG_ERRORS) Main.log("[Mongo] Load db: " + dbName.toString());
             datastoreMap.put(dbName.toString(), setDatastore(dbName.toString()));
         }
-        if (Main.DEBUG_ERROR) Main.log("[Mongo] " + datastoreMap.size() + " db loaded");
+        if (Main.DEBUG_ERRORS) Main.log("[Mongo] " + datastoreMap.size() + " db loaded");
         return datastoreMap;
     }
 
@@ -60,8 +68,9 @@ public class Init {
         Datastore datastore = Morphia.createDatastore(MongoClients.create(settings), dbName, MapperOptions.builder()
                 .enablePolymorphicQueries(true)
                 .build());
-        datastore.getMapper().mapPackage("fr.milekat.discordbot.bot.events.classes");
-        datastore.getMapper().mapPackage("fr.milekat.discordbot.bot.master.classes");
+        datastore.getMapper().map(Event.class, Participation.class, Team.class);
+        datastore.getMapper().map(Profile.class, Step.class, StepInput.class);
+        datastore.getMapper().map(Ban.class, Mute.class);
         datastore.ensureIndexes();
         datastore.ensureCaps();
         datastore.enableDocumentValidation();

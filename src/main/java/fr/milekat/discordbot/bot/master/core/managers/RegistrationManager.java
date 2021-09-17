@@ -1,9 +1,11 @@
-package fr.milekat.discordbot.bot.master.managers;
+package fr.milekat.discordbot.bot.master.core.managers;
 
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.classes.Registration;
+import fr.milekat.discordbot.bot.master.core.features.Registration;
+
+;
 
 public class RegistrationManager {
     private static final Datastore DATASTORE = Main.getDatastore("master");

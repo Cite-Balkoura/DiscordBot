@@ -1,4 +1,4 @@
-package fr.milekat.discordbot.bot.master.classes;
+package fr.milekat.discordbot.bot.master.core.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;

@@ -5,7 +5,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.events.classes.Event;
 import fr.milekat.discordbot.bot.events.classes.Team;
-import fr.milekat.discordbot.bot.master.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 
 import java.util.Collections;
 

@@ -23,7 +23,7 @@ public class Console {
                         Main.log("config.json file reloaded successfully");
                     } catch (IOException | ParseException exception) {
                         Main.log("config.json not found, reload cancelled");
-                        if (Main.DEBUG_ERROR) exception.printStackTrace();
+                        if (Main.DEBUG_ERRORS) exception.printStackTrace();
                     }
                 } else if (input.equalsIgnoreCase("debug")) {
                     debug();
@@ -61,8 +61,8 @@ public class Console {
      * Passe en mode debug (throwable Java)
      */
     private void debug() {
-        Main.DEBUG_ERROR = !Main.DEBUG_ERROR;
-        Main.log("Mode debug: " + Main.DEBUG_ERROR + ".");
+        Main.DEBUG_ERRORS = !Main.DEBUG_ERRORS;
+        Main.log("Mode debug: " + Main.DEBUG_ERRORS + ".");
     }
 
     /**

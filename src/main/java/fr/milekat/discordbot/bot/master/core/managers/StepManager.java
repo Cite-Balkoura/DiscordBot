@@ -1,9 +1,9 @@
-package fr.milekat.discordbot.bot.master.managers;
+package fr.milekat.discordbot.bot.master.core.managers;
 
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.classes.Step;
+import fr.milekat.discordbot.bot.master.core.classes.Step;
 
 import java.util.ArrayList;
 
