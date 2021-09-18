@@ -82,7 +82,7 @@ public class ModerationUtils {
                             "type": "mute",
                             "target": "%s",
                             "sender": "%s",
-                            "delay": "%s",
+                            "delay": %s,
                             "reason": "%s"
                         }""", target.getUuid(), sender.getUuid(), delay, reason));
         } catch (IOException | TimeoutException exception) {
@@ -163,7 +163,7 @@ public class ModerationUtils {
                             "type": "ban",
                             "target": "%s",
                             "sender": "%s",
-                            "delay": "%s",
+                            "delay": %s,
                             "reason": "%s"
                         }""", target.getUuid(), sender.getUuid(), delay, reason));
         } catch (IOException | TimeoutException exception) {
@@ -179,6 +179,7 @@ public class ModerationUtils {
         if (BanManager.isBanned(target)) {
             Ban oldBan = BanManager.getLastBan(target);
             Ban updatedBan = new Ban(target, oldBan.getBanDate(), new Date(), oldBan.getReasonBan());
+            updatedBan.setChannel(oldBan.getChannel());
             BanManager.save(oldBan.setAcknowledge(true));
             BanManager.save(updatedBan.setReasonPardon(reason).setAcknowledge(true));
             ModerationUtils.unBanNotify(targetMember, updatedBan);

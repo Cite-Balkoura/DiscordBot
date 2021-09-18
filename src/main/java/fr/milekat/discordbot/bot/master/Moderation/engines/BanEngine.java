@@ -22,6 +22,6 @@ public class BanEngine {
                     }
                 }
             }
-        }, 0, 5000)).start();
+        }, 0, 2000)).start();
     }
 }
