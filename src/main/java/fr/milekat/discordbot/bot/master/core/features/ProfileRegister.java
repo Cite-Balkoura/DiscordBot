@@ -8,7 +8,7 @@ import fr.milekat.discordbot.bot.master.core.classes.StepInput;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
 import fr.milekat.discordbot.bot.master.core.managers.StepManager;
-import fr.milekat.discordbot.utils.MojangNames;
+import fr.milekat.utils.McNames;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -241,7 +241,7 @@ public class ProfileRegister extends ListenerAdapter {
                             } else {
                                 try {
                                     registration.setUsername(message.getContentRaw());
-                                    registration.setUuid(UUID.fromString(MojangNames.getUuid(message.getContentRaw())));
+                                    registration.setUuid(UUID.fromString(McNames.getUuid(message.getContentRaw())));
                                     registration.setStep(step.getNext());
                                     if (step.isSave()) registration.addInputs(new StepInput(step, message.getContentRaw()));
                                 } catch (IOException ignored) {

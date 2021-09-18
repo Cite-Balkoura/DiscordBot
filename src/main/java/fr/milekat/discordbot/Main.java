@@ -4,8 +4,8 @@ import dev.morphia.Datastore;
 import fr.milekat.discordbot.bot.BotManager;
 import fr.milekat.discordbot.core.Init;
 import fr.milekat.discordbot.core.RabbitMQ;
-import fr.milekat.discordbot.utils.DateMileKat;
 import fr.milekat.discordbot.utils.WriteLog;
+import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.JDA;
 import org.slf4j.impl.SimpleLogger;
 

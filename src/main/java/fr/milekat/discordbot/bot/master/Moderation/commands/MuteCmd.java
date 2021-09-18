@@ -3,7 +3,7 @@ package fr.milekat.discordbot.bot.master.Moderation.commands;
 import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
-import fr.milekat.discordbot.utils.DateMileKat;
+import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

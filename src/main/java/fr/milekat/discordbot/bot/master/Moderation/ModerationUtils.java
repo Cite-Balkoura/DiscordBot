@@ -9,7 +9,7 @@ import fr.milekat.discordbot.bot.master.Moderation.managers.MuteManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.core.RabbitMQ;
-import fr.milekat.discordbot.utils.DateMileKat;
+import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;

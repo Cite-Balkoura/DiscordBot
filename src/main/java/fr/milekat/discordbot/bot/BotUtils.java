@@ -6,7 +6,6 @@ import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -27,8 +26,8 @@ public class BotUtils {
     public static void sendRegister(Member member, MessageEmbed embed) {
         if (RegistrationManager.exists(member.getIdLong())) {
             RegistrationManager.getRegistration(member.getIdLong()).getChannel().sendMessageEmbeds(embed).setActionRow(
-                    Button.primary("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")).withStyle(ButtonStyle.SUCCESS),
-                    Button.primary("no", Emoji.fromMarkdown("<a:No:798960407708303403>")).withStyle(ButtonStyle.DANGER)
+                    Button.success("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")),
+                    Button.danger("no", Emoji.fromMarkdown("<a:No:798960407708303403>"))
             ).queue();
         }
     }

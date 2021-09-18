@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 
 public class JoinEvent extends ListenerAdapter {
     private final String JOIN_EVENT = "Join Event";
@@ -37,7 +36,7 @@ public class JoinEvent extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         if (!event.getChannel().equals(BotUtils.getChannel("cEvent"))) return;
         if (event.getMessage().getEmbeds().isEmpty() || event.getMessage().getEmbeds().get(0).getTitle()==null) return;
-        event.getMessage().getButtons().add(Button.primary(event.getMessage().getEmbeds().get(0).getTitle(), JOIN_EVENT).withStyle(ButtonStyle.PRIMARY));
+        event.getMessage().getButtons().add(Button.primary(event.getMessage().getEmbeds().get(0).getTitle(), JOIN_EVENT));
     }
 
     /**
