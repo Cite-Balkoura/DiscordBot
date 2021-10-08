@@ -21,9 +21,9 @@ compileJava.options.encoding = 'UTF-8'
 
 dependencies {
     implementation group: 'com.github.tutur1004', name: 'MilekatUtils', version: '879026bfd2'
-    implementation (group: 'net.dv8tion', name:'JDA', version:'4.3.0_324') { exclude module: "opus-java" }
+    implementation (group: 'net.dv8tion', name:'JDA', version:'4.3.0_334') { exclude module: "opus-java" }
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-    implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.3.0'
+    implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.3.2'
     implementation group: 'dev.morphia.morphia', name: 'morphia-core', version: '2.2.1'
     implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.13.1'
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'

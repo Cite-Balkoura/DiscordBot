@@ -5,6 +5,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class ProfileManager {
@@ -26,6 +27,15 @@ public class ProfileManager {
         return DATASTORE.find(Profile.class)
                 .filter(Filters.eq("uuid", uuid))
                 .first();
+    }
+
+    /**
+     * Get a list of Profiles by UUIDs
+     */
+    public static ArrayList<Profile> getProfiles(ArrayList<UUID> uuids) {
+        ArrayList<Profile> profiles = new ArrayList<>();
+        uuids.forEach(uuid -> profiles.add(getProfile(uuid)));
+        return profiles;
     }
 
     /**

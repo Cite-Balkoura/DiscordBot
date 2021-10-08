@@ -1,32 +1,35 @@
-package fr.milekat.discordbot.bot.master.Moderation.classes;
+package fr.milekat.discordbot.bot.master.moderation.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.mapping.experimental.MorphiaReference;
+import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
 
-@Entity(value = "mute")
-public class Mute {
+@Entity(value = "ban")
+public class Ban {
     @Id
     private ObjectId id;
     private MorphiaReference<Profile> profile;
-    private Date muteDate;
+    private Long channelId;
+    private Date banDate;
     private Date lastUpdate;
     private Date pardonDate;
-    private String reasonMute;
+    private String reasonBan;
     private String reasonPardon;
     private Boolean acknowledge;
 
-    public Mute() {}
+    public Ban() {}
 
-    public Mute(Profile profile, Date muteDate, Date pardonDate, String reasonMute) {
+    public Ban(Profile profile, Date banDate, Date pardonDate, String reasonBan) {
         this.profile = MorphiaReference.wrap(profile);
-        this.muteDate = muteDate;
+        this.banDate = banDate;
         this.pardonDate = pardonDate;
-        this.reasonMute = reasonMute;
+        this.reasonBan = reasonBan;
         this.lastUpdate = new Date();
         this.acknowledge = false;
     }
@@ -35,8 +38,18 @@ public class Mute {
         return profile.get();
     }
 
-    public Date getMuteDate() {
-        return muteDate;
+    public TextChannel getChannel() {
+        return Main.getJDA().getTextChannelById(channelId);
+    }
+
+    public Ban setChannel(TextChannel channel) {
+        this.lastUpdate = new Date();
+        this.channelId = channel.getIdLong();
+        return this;
+    }
+
+    public Date getBanDate() {
+        return banDate;
     }
 
     public Date getLastUpdate() {
@@ -47,26 +60,21 @@ public class Mute {
         return pardonDate;
     }
 
-    public Mute setPardonDate(Date pardonDate) {
-        this.pardonDate = pardonDate;
-        return this;
-    }
-
-    public String getReasonMute() {
-        return reasonMute;
+    public String getReasonBan() {
+        return reasonBan;
     }
 
     public String getReasonPardon() {
         return reasonPardon;
     }
 
-    public Mute setReasonPardon(String reasonPardon) {
+    public Ban setReasonPardon(String reasonPardon) {
         this.lastUpdate = new Date();
         this.reasonPardon = reasonPardon;
         return this;
     }
 
-    public Mute setAcknowledge(Boolean acknowledge) {
+    public Ban setAcknowledge(Boolean acknowledge) {
         this.lastUpdate = new Date();
         this.acknowledge = acknowledge;
         return this;

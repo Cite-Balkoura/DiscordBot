@@ -2,12 +2,12 @@ package fr.milekat.discordbot.bot.master.core.features;
 
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.Moderation.classes.Ban;
-import fr.milekat.discordbot.bot.master.Moderation.managers.BanManager;
-import fr.milekat.discordbot.bot.master.Moderation.managers.MuteManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
+import fr.milekat.discordbot.bot.master.moderation.classes.Ban;
+import fr.milekat.discordbot.bot.master.moderation.managers.BanManager;
+import fr.milekat.discordbot.bot.master.moderation.managers.MuteManager;
 import fr.milekat.discordbot.utils.Config;
 import fr.milekat.utils.Tools;
 import net.dv8tion.jda.api.Permission;

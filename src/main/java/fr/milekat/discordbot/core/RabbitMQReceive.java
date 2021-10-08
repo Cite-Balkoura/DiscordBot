@@ -1,9 +1,13 @@
 package fr.milekat.discordbot.core;
 
+import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
+import fr.milekat.discordbot.bot.events.classes.Event;
+import fr.milekat.discordbot.bot.events.managers.EventManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
+import net.dv8tion.jda.api.entities.Category;
 import org.json.simple.JSONObject;
 
 import java.util.UUID;
@@ -23,6 +27,8 @@ public class RabbitMQReceive {
         unmute,
         ban,
         unban,
+        chatEvent,
+        chatTeam,
         other
     }
 
@@ -41,6 +47,20 @@ public class RabbitMQReceive {
                         case unmute -> ModerationUtils.unMute(member, target, reason);
                     }
                 });
+            }
+            case chatEvent -> {
+                Event mcEvent = EventManager.getEvent((String) payload.get("event"));
+                Category category = BotUtils.getGuild().getCategoryById(mcEvent.getCategoryId());
+                if (category==null) {
+                    Main.log("[Error] Event or Category of event " + payload.get("event") + " not found.");
+                    return;
+                }
+                category.getTextChannels().stream()
+                        .filter(textChannel -> textChannel.getName().equalsIgnoreCase("chat"))
+                        .forEach(textChannel -> textChannel.sendMessage((String) payload.get("message")).queue());
+            }
+            case chatTeam -> {
+                // TODO: 08/10/2021 Do it
             }
         }
     }

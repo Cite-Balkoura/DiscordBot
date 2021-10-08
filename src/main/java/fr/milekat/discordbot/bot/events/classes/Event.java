@@ -4,25 +4,32 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import fr.milekat.discordbot.Main;
+import net.dv8tion.jda.api.entities.Category;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-@Entity(value = "eventMain")
+@Entity(value = "event")
 public class Event {
     @Id
     private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true))
     private String name;
+    @Indexed(options = @IndexOptions(unique = true))
+    private String database;
     private String type;
     private ArrayList<EventFeature> eventFeatures;
     private Date startDate;
     private Date endDate;
     private String description;
+    @Indexed(options = @IndexOptions(unique = true))
     private long roleId;
     @Indexed(options = @IndexOptions(unique = true))
     private long categoryId;
+    @Indexed(options = @IndexOptions(unique = true))
+    private long categoryTeamId;
 
     public enum EventFeature {
         TIME,
@@ -33,19 +40,12 @@ public class Event {
 
     public Event() {}
 
-    public Event(String name, String type, ArrayList<EventFeature> eventFeatures, Date startDate, Date endDate, String description, long roleId, long categoryId) {
-        this.name = name;
-        this.type = type;
-        this.eventFeatures = eventFeatures;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.description = description;
-        this.roleId = roleId;
-        this.categoryId = categoryId;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public String getDatabase() {
+        return database;
     }
 
     public String getType() {
@@ -76,7 +76,11 @@ public class Event {
         return categoryId;
     }
 
-    public void setCategoryId(long categoryId) {
-        this.categoryId = categoryId;
+    public long getCategoryTeamId() {
+        return categoryTeamId;
+    }
+
+    public Category getCategoryTeam() {
+        return Main.getJDA().getCategoryById(categoryTeamId);
     }
 }

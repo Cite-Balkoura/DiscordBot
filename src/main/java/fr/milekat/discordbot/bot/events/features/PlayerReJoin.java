@@ -27,6 +27,7 @@ public class PlayerReJoin extends ListenerAdapter {
                 if (role==null) continue;
                 BotUtils.getGuild().addRoleToMember(event.getMember(), role).queue();
             }
+            // TODO: 08/10/2021 Team(s) rejoin
         }
     }
 }

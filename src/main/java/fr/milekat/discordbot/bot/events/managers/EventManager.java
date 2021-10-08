@@ -29,6 +29,15 @@ public class EventManager {
     }
 
     /**
+     * Get an Event by Category id
+     */
+    public static Event getEventTeam(Long categoryTeamId) {
+        return DATASTORE.find(Event.class)
+                .filter(Filters.eq("categoryTeamId", categoryTeamId))
+                .first();
+    }
+
+    /**
      * Get all events
      */
     public static ArrayList<Event> getEvents() {

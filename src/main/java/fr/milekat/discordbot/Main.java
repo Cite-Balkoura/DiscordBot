@@ -3,6 +3,7 @@ package fr.milekat.discordbot;
 import dev.morphia.Datastore;
 import fr.milekat.discordbot.bot.BotManager;
 import fr.milekat.discordbot.core.Init;
+import fr.milekat.discordbot.core.MongoDB;
 import fr.milekat.discordbot.core.RabbitMQ;
 import fr.milekat.discordbot.utils.WriteLog;
 import fr.milekat.utils.DateMileKat;
@@ -34,7 +35,7 @@ public class Main {
         //  Console load
         init.getConsole().start();
         //  Load Mongo
-        datastoreMap = init.getDatastoreMap();
+        datastoreMap = MongoDB.getDatastoreMap();
         //  Load RabbitMQ
         new RabbitMQ().getRabbitConsumer().start();
         //  Discord bot load

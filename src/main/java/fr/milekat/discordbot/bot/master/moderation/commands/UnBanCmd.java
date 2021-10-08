@@ -1,10 +1,10 @@
-package fr.milekat.discordbot.bot.master.Moderation.commands;
+package fr.milekat.discordbot.bot.master.moderation.commands;
 
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
-import fr.milekat.discordbot.bot.master.Moderation.classes.Ban;
-import fr.milekat.discordbot.bot.master.Moderation.managers.BanManager;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
+import fr.milekat.discordbot.bot.master.moderation.classes.Ban;
+import fr.milekat.discordbot.bot.master.moderation.managers.BanManager;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

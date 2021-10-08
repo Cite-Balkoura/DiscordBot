@@ -6,45 +6,53 @@ import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
 import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.BotUtils;
+import fr.milekat.discordbot.bot.events.managers.EventManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-@Entity("eventTeam")
+@Entity("team")
 public class Team {
     @Id
     private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
-    private String name;
-    private MorphiaReference<Event> event;
+    private String teamName;
+    private String eventName;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private MorphiaReference<Profile> owner;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
-    private MorphiaReference<ArrayList<Profile>> members;
+    private ArrayList<UUID> members;
     private boolean open;
     private long messageId;
+    private long channelId;
 
     public Team() {}
 
-    public Team(Event event, String name, Profile owner) {
-        this.event = MorphiaReference.wrap(event);
-        this.name = name;
+    public Team(String eventName, String teamName, Profile owner) {
+        this.eventName = eventName;
+        this.teamName = teamName;
         this.owner = MorphiaReference.wrap(owner);
         this.open = true;
     }
 
+    public ObjectId getId() {
+        return id;
+    }
+
     public Event getEvent() {
-        return event.get();
+        return EventManager.getEvent(eventName);
     }
 
-    public String getName() {
-        return name;
+    public String getTeamName() {
+        return teamName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public Profile getOwner() {
@@ -52,11 +60,12 @@ public class Team {
     }
 
     public ArrayList<Profile> getMembers() {
-        return this.members==null ? new ArrayList<>() : new ArrayList<>(this.members.get());
+        if (members==null) return new ArrayList<>();
+        return ProfileManager.getProfiles(members);
     }
 
     public void setMembers(ArrayList<Profile> members) {
-        this.members = MorphiaReference.wrap(members);
+        this.members = new ArrayList<>(members.stream().map(Profile::getUuid).toList());
     }
 
     public void addMember(Profile profile) {
@@ -73,10 +82,8 @@ public class Team {
         this.open = open;
     }
 
-    public long getChannelId() {
-        return Main.getJDA().getCategoryById(getEvent().getCategoryId()).getTextChannels().stream()
-                .filter(textChannel -> getName().equalsIgnoreCase(BotUtils.getMsg("teamBuilder.teamChannelName")))
-                .findFirst().get().getIdLong();
+    public TextChannel getChannel() {
+        return Main.getJDA().getTextChannelById(channelId);
     }
 
     public long getMessageId() {

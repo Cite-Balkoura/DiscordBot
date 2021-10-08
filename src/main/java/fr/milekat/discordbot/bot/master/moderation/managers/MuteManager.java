@@ -1,10 +1,10 @@
-package fr.milekat.discordbot.bot.master.Moderation.managers;
+package fr.milekat.discordbot.bot.master.moderation.managers;
 
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.Moderation.classes.Mute;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.moderation.classes.Mute;
 
 import java.util.ArrayList;
 import java.util.Comparator;

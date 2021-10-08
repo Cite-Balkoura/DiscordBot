@@ -11,7 +11,7 @@
       "user" : "minecraft",
       "password" : "admin",
       "db" : "admin",
-      "databases" : ["master"]
+      "databases" : ["master", "event_journey"]
     },
     "rabbitMQ": {
       "host" : "127.0.0.1",
@@ -64,9 +64,10 @@
         ]
       },
       "joinEvent": {
-        "joinEvent" : "Thank to join the event <EVENT_NAME>",
-        "joinEventDescription" : "Event description: ",
-        "joinEventDate" : "This event will start on <START_DATE> and finish on <END_DATE>"
+        "greeting" : "Thank to join the event <EVENT_NAME>",
+        "description" : "Event description: <EVENT_DESC>",
+        "startDate" : "This event will start on <START_DATE> and finish on <END_DATE>",
+        "hasTeam": "You can join/build a team in <CHANNEL>"
       },
       "profileReg": {
         "slashRegister": "Register form manage command",
@@ -117,7 +118,7 @@
         "slashCreateTeamDesc": "Create a new team for this event",
         "slashOptDescName": "The name of your new team",
         "wrongChannel": "Wrong channel, this command only work on team channels",
-        "teamChannelName": "team-channel",
+        "teamChannelName": "team-builder",
         "teamCreated": "You successfully create the team <name>.",
         "teamCreateError": "Sorry, you can't create this team.",
         "buttonJoinTeam": "Join this team"

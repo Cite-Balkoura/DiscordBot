@@ -1,8 +1,8 @@
-package fr.milekat.discordbot.bot.master.Moderation.commands;
+package fr.milekat.discordbot.bot.master.moderation.commands;
 
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

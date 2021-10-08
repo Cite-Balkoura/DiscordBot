@@ -1,9 +1,9 @@
-package fr.milekat.discordbot.bot.master.Moderation.engines;
+package fr.milekat.discordbot.bot.master.moderation.engines;
 
 import fr.milekat.discordbot.bot.BotUtils;
-import fr.milekat.discordbot.bot.master.Moderation.ModerationUtils;
-import fr.milekat.discordbot.bot.master.Moderation.classes.Mute;
-import fr.milekat.discordbot.bot.master.Moderation.managers.MuteManager;
+import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
+import fr.milekat.discordbot.bot.master.moderation.classes.Mute;
+import fr.milekat.discordbot.bot.master.moderation.managers.MuteManager;
 
 import java.util.Date;
 import java.util.Timer;
