@@ -24,6 +24,7 @@ public class Event {
     private Date startDate;
     private Date endDate;
     private String description;
+    private Integer teamSize;
     @Indexed(options = @IndexOptions(unique = true))
     private long roleId;
     @Indexed(options = @IndexOptions(unique = true))
@@ -68,12 +69,20 @@ public class Event {
         return description;
     }
 
+    public Integer getTeamSize() {
+        return teamSize;
+    }
+
     public long getRoleId() {
         return roleId;
     }
 
     public long getCategoryId() {
         return categoryId;
+    }
+
+    public Category getCategory() {
+        return Main.getJDA().getCategoryById(categoryId);
     }
 
     public long getCategoryTeamId() {

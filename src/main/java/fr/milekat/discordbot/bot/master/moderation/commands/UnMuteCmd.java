@@ -5,26 +5,13 @@ import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import javax.annotation.Nonnull;
 
 public class UnMuteCmd extends ListenerAdapter {
     public UnMuteCmd() {
-        BotUtils.getGuild().upsertCommand(
-                new CommandData("unmute", BotUtils.getMsg("mute.slashUnMute"))
-                        .addOptions(new OptionData(OptionType.USER,
-                                        "member",
-                                        BotUtils.getMsg("mute.slashOptDescMember"),
-                                        true),
-                                new OptionData(OptionType.STRING,
-                                        "reason",
-                                        BotUtils.getMsg("mute.slashOptDescReason"),
-                                        true)
-                        ).setDefaultEnabled(false)
+        BotUtils.getGuild().upsertCommand(BotUtils.getCommand("mute.unMuteCmd").setDefaultEnabled(false)
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
                 new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
         ).queue());

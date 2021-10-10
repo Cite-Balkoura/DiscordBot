@@ -7,9 +7,6 @@ import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import javax.annotation.Nonnull;
@@ -17,20 +14,7 @@ import java.util.Date;
 
 public class BanCmd extends ListenerAdapter {
     public BanCmd() {
-        BotUtils.getGuild().upsertCommand(new CommandData("ban", BotUtils.getMsg("ban.slashBan"))
-                .addOptions(new OptionData(OptionType.USER,
-                                "member",
-                                BotUtils.getMsg("ban.slashOptDescMember"),
-                                true),
-                        new OptionData(OptionType.STRING,
-                                "duration",
-                                BotUtils.getMsg("ban.slashOptDescDuration"),
-                                true),
-                        new OptionData(OptionType.STRING,
-                                "reason",
-                                BotUtils.getMsg("ban.slashOptDescReason"),
-                                true)
-                ).setDefaultEnabled(false)
+        BotUtils.getGuild().upsertCommand(BotUtils.getCommand("ban.banCmd").setDefaultEnabled(false)
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
                 new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
         ).queue());

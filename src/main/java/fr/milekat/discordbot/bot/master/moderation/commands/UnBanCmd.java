@@ -8,26 +8,13 @@ import fr.milekat.discordbot.bot.master.moderation.managers.BanManager;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import javax.annotation.Nonnull;
 
 public class UnBanCmd extends ListenerAdapter {
     public UnBanCmd() {
-        BotUtils.getGuild().upsertCommand(
-                new CommandData("unban", BotUtils.getMsg("ban.slashUnBan"))
-                        .addOptions(new OptionData(OptionType.USER,
-                                        "member",
-                                        BotUtils.getMsg("ban.slashOptDescMember"),
-                                        true),
-                                new OptionData(OptionType.STRING,
-                                        "reason",
-                                        BotUtils.getMsg("ban.slashOptDescReason"),
-                                        true)
-                        ).setDefaultEnabled(false)
+        BotUtils.getGuild().upsertCommand(BotUtils.getCommand("ban.unBanCmd").setDefaultEnabled(false)
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
                 new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
         ).queue());

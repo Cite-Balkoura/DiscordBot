@@ -4,7 +4,6 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
-import dev.morphia.mapping.experimental.MorphiaReference;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.events.managers.EventManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
@@ -21,12 +20,13 @@ public class Team {
     private ObjectId id;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private String teamName;
+    private String description;
     private String eventName;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
-    private MorphiaReference<Profile> owner;
+    private UUID owner;
     @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private ArrayList<UUID> members;
-    private boolean open;
+    private boolean access;
     private long messageId;
     private long channelId;
 
@@ -35,8 +35,10 @@ public class Team {
     public Team(String eventName, String teamName, Profile owner) {
         this.eventName = eventName;
         this.teamName = teamName;
-        this.owner = MorphiaReference.wrap(owner);
-        this.open = true;
+        this.owner = owner.getUuid();
+        addMember(owner);
+        this.description = "";
+        this.access = true;
     }
 
     public ObjectId getId() {
@@ -55,11 +57,27 @@ public class Team {
         this.teamName = teamName;
     }
 
-    public Profile getOwner() {
-        return owner.get();
+    public String getDescription() {
+        return description;
     }
 
-    public ArrayList<Profile> getMembers() {
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public UUID getOwner() {
+        return owner;
+    }
+
+    public Profile getOwnerProfile() {
+        return ProfileManager.getProfile(owner);
+    }
+
+    public ArrayList<UUID> getMembers() {
+        return members;
+    }
+
+    public ArrayList<Profile> getMembersProfiles() {
         if (members==null) return new ArrayList<>();
         return ProfileManager.getProfiles(members);
     }
@@ -69,21 +87,32 @@ public class Team {
     }
 
     public void addMember(Profile profile) {
-        ArrayList<Profile> members = getMembers();
-        members.add(profile);
-        setMembers(members);
+        if (members==null) members = new ArrayList<>();
+        members.add(profile.getUuid());
+    }
+
+    public int getSize() {
+        return members.size();
     }
 
     public boolean isOpen() {
-        return open;
+        return access;
     }
 
-    public void setOpen(boolean open) {
-        this.open = open;
+    public void setAccess(boolean access) {
+        this.access = access;
     }
 
     public TextChannel getChannel() {
         return Main.getJDA().getTextChannelById(channelId);
+    }
+
+    public long getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(long channelId) {
+        this.channelId = channelId;
     }
 
     public long getMessageId() {

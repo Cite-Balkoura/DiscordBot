@@ -87,41 +87,175 @@
         "buttonAcknowledge": "Close this channel"
       },
       "mute": {
-        "slashCmd": "Mute a member",
-        "slashOptDescMember": "Member to mute",
-        "slashOptDescDuration": "Mute duration (Format: 1d2h3m5s)",
-        "slashOptDescReason": "Why ?",
+        "muteCmd" : {
+          "name": "mute",
+          "desc": "Mute a member",
+          "args": [
+            {
+              "type": "USER",
+              "argument": "target",
+              "desc": "Member to mute",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "delay",
+              "desc": "Mute duration (Format: 1d2h3m5s)",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "reason",
+              "desc": "Reason",
+              "required": true
+            }
+          ]
+        },
+        "unMuteCmd" : {
+          "name": "unmute",
+          "desc": "UnMute a member",
+          "args": [
+            {
+              "type": "USER",
+              "argument": "target",
+              "desc": "Member to unmute",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "reason",
+              "desc": "Reason",
+              "required": true
+            }
+          ]
+        },
         "slashDelayToLow": "Delay too low, please use more than 10s",
         "slashNoProfile": "This member hasn't a profile yet",
         "slashSuccess": "Command success !",
-        "slashUnMute": "Unmute a member",
         "expired": "Delay passed",
         "notMuted": "Member not muted"
       },
       "ban": {
-        "slashBan": "Ban a member",
-        "slashOptDescMember": "Member to target",
-        "slashOptDescDuration": "Ban duration (Format: 1d2h3m5s)",
-        "slashOptDescReason": "Why ?",
+        "banCmd" : {
+          "name": "ban",
+          "desc": "Member to ban",
+          "args": [
+            {
+              "type": "USER",
+              "argument": "target",
+              "desc": "Member to ban",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "delay",
+              "desc": "Ban duration (Format: 1d2h3m5s)",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "reason",
+              "desc": "Reason",
+              "required": true
+            }
+          ]
+        },
+        "unBanCmd" : {
+          "name": "unban",
+          "desc": "UnBan a member",
+          "args": [
+            {
+              "type": "USER",
+              "argument": "target",
+              "desc": "Member to unban",
+              "required": true
+            },
+            {
+              "type": "STRING",
+              "argument": "reason",
+              "desc": "Reason",
+              "required": true
+            }
+          ]
+        },
         "slashDelayToLow": "Delay too low, please use more than 10s",
         "slashNoProfile": "This member hasn't a profile yet",
         "slashSuccess": "Command success !",
         "informMessage" : "Hi <mention>, you have been banned because <reason> for <ban-delay> until <pardon-date>.",
         "informUpdate" : "Hi <mention>, your ban has been updated because <reason> for <ban-delay> until <pardon-date>.",
-        "slashUnBan": "Unban a member",
         "notBanned": "Member not banned",
         "unBanNotify": "You have been unbanned because <reason>, you can close this channel",
         "buttonAcknowledge": "Close this channel",
         "expired": "Delay passed"
       },
       "teamBuilder": {
-        "slashCreateTeamDesc": "Create a new team for this event",
-        "slashOptDescName": "The name of your new team",
+        "command" : {
+          "name": "team",
+          "desc": "Command to create/manage your team",
+          "subs": [
+            {
+              "argument": "create",
+              "desc": "Create a new team for this event",
+              "args": [
+                {
+                  "type": "STRING",
+                  "argument": "name",
+                  "desc": "The name of team to create",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "argument": "rename",
+              "desc": "Rename your team (Owner only)",
+              "args": [
+                {
+                  "type": "STRING",
+                  "argument": "team_name",
+                  "desc": "The new name for your team",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "argument": "access",
+              "desc": "Define if your team accept new players (Owner only)",
+              "args": [
+                {
+                  "type": "BOOLEAN",
+                  "argument": "access",
+                  "desc": "True: players can ask to join, False: team set to closed",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "argument": "description",
+              "desc": "Define your team description (Owner only)",
+              "args": [
+                {
+                  "type": "STRING",
+                  "argument": "description",
+                  "desc": "Write your new description (200 char max)",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
         "wrongChannel": "Wrong channel, this command only work on team channels",
+        "alreadyTeaming": "Vous avez déjà une équipe sur cet évent",
         "teamChannelName": "team-builder",
         "teamCreated": "You successfully create the team <name>.",
         "teamCreateError": "Sorry, you can't create this team.",
-        "buttonJoinTeam": "Join this team"
+        "buttonJoinTeam": "Join this team",
+        "playerRequest": "New join request from <MENTION>.",
+        "requestSent": "Your request has been sent ! Wait for team owner to accept",
+        "joinNotify": "Welcome to <MENTION> into the team.",
+        "teamRename": "You renamed your team with <name>.",
+        "teamRenameError": "Sorry, this name is not available.",
+        "teamAccess": "You define the team access to: <access>.",
+        "teamDescription": "Description updated."
       }
     }
   }

@@ -6,9 +6,6 @@ import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
 import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import javax.annotation.Nonnull;
@@ -16,21 +13,7 @@ import java.util.Date;
 
 public class MuteCmd extends ListenerAdapter {
     public MuteCmd() {
-        BotUtils.getGuild().upsertCommand(
-                new CommandData("mute", BotUtils.getMsg("mute.slashCmd"))
-                        .addOptions(new OptionData(OptionType.USER,
-                                        "member",
-                                        BotUtils.getMsg("mute.slashOptDescMember"),
-                                        true),
-                                new OptionData(OptionType.STRING,
-                                        "duration",
-                                        BotUtils.getMsg("mute.slashOptDescDuration"),
-                                        true),
-                                new OptionData(OptionType.STRING,
-                                        "reason",
-                                        BotUtils.getMsg("mute.slashOptDescReason"),
-                                        true)
-                        ).setDefaultEnabled(false)
+        BotUtils.getGuild().upsertCommand(BotUtils.getCommand("mute.muteCmd").setDefaultEnabled(false)
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
                 new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
         ).queue());

@@ -20,18 +20,18 @@ public class EventManager {
     }
 
     /**
-     * Get an Event by Category id
+     * Get an Event by Main Category id
      */
-    public static Event getEvent(Long eventCategory) {
+    public static Event getEventCtMain(Long eventCategory) {
         return DATASTORE.find(Event.class)
                 .filter(Filters.eq("categoryId", eventCategory))
                 .first();
     }
 
     /**
-     * Get an Event by Category id
+     * Get an Event by Team Category id
      */
-    public static Event getEventTeam(Long categoryTeamId) {
+    public static Event getEventCtTeam(Long categoryTeamId) {
         return DATASTORE.find(Event.class)
                 .filter(Filters.eq("categoryTeamId", categoryTeamId))
                 .first();
@@ -42,12 +42,5 @@ public class EventManager {
      */
     public static ArrayList<Event> getEvents() {
         return new ArrayList<>(DATASTORE.find(Event.class).iterator().toList());
-    }
-
-    /**
-     * Save/Update an event
-     */
-    public static void save(Event event) {
-        DATASTORE.save(event);
     }
 }

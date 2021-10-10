@@ -57,9 +57,9 @@ public class ProfileManager {
     }
 
     /**
-     * Save/Update a Profile
+     * Create a new Profile
      */
-    public static void save(Profile profile) {
+    public static void create(Profile profile) {
         DATASTORE.save(profile);
     }
 }

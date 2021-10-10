@@ -66,7 +66,7 @@ public class JoinEvent extends ListenerAdapter {
             return;
         }
         //  Save his participation to the event
-        ParticipationManager.save(new Participation(profile.getUuid(), event));
+        ParticipationManager.create(new Participation(profile, event));
         Category category = BotUtils.getGuild().getCategoryById(event.getCategoryId());
         if (category==null) {
             Main.log("[Error] Event or Category of event " + event.getName() + " not found.");

@@ -5,6 +5,9 @@ import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
 import fr.milekat.discordbot.utils.Config;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -114,10 +117,12 @@ public class BotUtils {
      */
     public static String getNodeValue(JSONObject objectFile, String path) {
         JSONObject jsonObject = objectFile;
-        for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
-            jsonObject = (JSONObject) jsonObject.get(node);
-        }
-        return jsonObject.get(path.substring(path.lastIndexOf('.') + 1)).toString();
+        if (path.contains(".")) {
+            for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
+                jsonObject = (JSONObject) jsonObject.get(node);
+            }
+            return jsonObject.get(path.substring(path.lastIndexOf('.') + 1)).toString();
+        } else return objectFile.get(path).toString();
     }
 
     /**
@@ -125,9 +130,44 @@ public class BotUtils {
      */
     public static JSONArray getNodeArray(JSONObject objectFile, String path) {
         JSONObject jsonObject = objectFile;
-        for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
-            jsonObject = (JSONObject) jsonObject.get(node);
-        }
-        return (JSONArray) jsonObject.get(path.substring(path.lastIndexOf('.') + 1));
+        if (path.contains(".")) {
+            for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
+                jsonObject = (JSONObject) jsonObject.get(node);
+            }
+            return (JSONArray) jsonObject.get(path.substring(path.lastIndexOf('.') + 1));
+        } else return (JSONArray) objectFile.get(path);
+    }
+
+    /**
+     * Json to slash command parser
+     */
+    public static CommandData getCommand(String baseNode) {
+        CommandData command = new CommandData(getMsg(baseNode + ".name"), getMsg(baseNode + ".desc"));
+            getNodeArray(Config.getConfig(), "discord.msg." + baseNode + ".args").forEach(jsonArg ->
+                    command.addOption(OptionType.valueOf(getNodeValue((JSONObject) jsonArg, "type")),
+                            getNodeValue((JSONObject) jsonArg, "argument"),
+                            getNodeValue((JSONObject) jsonArg, "desc"),
+                            Boolean.parseBoolean(getNodeValue((JSONObject) jsonArg, "required")))
+            );
+        return command;
+    }
+
+    /**
+     * Json to slash command with sub parameters parser
+     */
+    public static CommandData getCommandWithSub(String baseNode) {
+        CommandData command = new CommandData(getMsg(baseNode + ".name"), getMsg(baseNode + ".desc"));
+        getNodeArray(Config.getConfig(), "discord.msg." + baseNode + ".subs").forEach(jsonCmd -> {
+            SubcommandData sub = new SubcommandData(getNodeValue((JSONObject) jsonCmd, "argument"),
+                    getNodeValue((JSONObject) jsonCmd, "desc"));
+            getNodeArray((JSONObject) jsonCmd, "args").forEach(jsonArg ->
+                    sub.addOption(OptionType.valueOf(getNodeValue((JSONObject) jsonArg, "type")),
+                            getNodeValue((JSONObject) jsonArg, "argument"),
+                            getNodeValue((JSONObject) jsonArg, "desc"),
+                            Boolean.parseBoolean(getNodeValue((JSONObject) jsonArg, "required")))
+            );
+            command.addSubcommands(sub);
+        });
+        return command;
     }
 }

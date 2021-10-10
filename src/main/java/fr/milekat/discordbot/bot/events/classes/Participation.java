@@ -2,33 +2,29 @@ package fr.milekat.discordbot.bot.events.classes;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Indexed;
-import dev.morphia.annotations.Reference;
+import dev.morphia.mapping.experimental.MorphiaReference;
+import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import org.bson.types.ObjectId;
-
-import java.util.UUID;
 
 @Entity(value = "participation")
 public class Participation {
     @Id
     private ObjectId id;
-    @Indexed
-    private UUID uuid;
-    @Reference(idOnly = true)
-    private Event event;
+    private MorphiaReference<Profile> profile;
+    private MorphiaReference<Event> event;
 
     public Participation() {}
 
-    public Participation(UUID uuid, Event event) {
-        this.uuid = uuid;
-        this.event = event;
+    public Participation(Profile profile, Event event) {
+        this.profile = MorphiaReference.wrap(profile);
+        this.event = MorphiaReference.wrap(event);
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public Profile getProfile() {
+        return profile.get();
     }
 
     public Event getEvent() {
-        return event;
+        return event.get();
     }
 }

@@ -3,6 +3,7 @@ package fr.milekat.discordbot.bot.master.core.features;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Registration;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.bot.master.core.managers.RegistrationManager;
 import fr.milekat.discordbot.bot.master.moderation.classes.Ban;

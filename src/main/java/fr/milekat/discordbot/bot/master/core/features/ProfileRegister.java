@@ -3,6 +3,7 @@ package fr.milekat.discordbot.bot.master.core.features;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import fr.milekat.discordbot.bot.master.core.classes.Registration;
 import fr.milekat.discordbot.bot.master.core.classes.Step;
 import fr.milekat.discordbot.bot.master.core.classes.StepInput;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
@@ -361,7 +362,7 @@ public class ProfileRegister extends ListenerAdapter {
                 });
                 registration.setStep("DONE");
                 RegistrationManager.save(registration);
-                ProfileManager.save(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
+                ProfileManager.create(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
                 BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
                 if (Main.DEBUG_ERRORS) Main.log("[" + registration.getUsername() + "] Register validated");

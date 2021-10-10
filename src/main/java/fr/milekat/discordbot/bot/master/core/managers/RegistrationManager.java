@@ -3,7 +3,7 @@ package fr.milekat.discordbot.bot.master.core.managers;
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.filters.Filters;
 import fr.milekat.discordbot.Main;
-import fr.milekat.discordbot.bot.master.core.features.Registration;
+import fr.milekat.discordbot.bot.master.core.classes.Registration;
 
 ;
 
