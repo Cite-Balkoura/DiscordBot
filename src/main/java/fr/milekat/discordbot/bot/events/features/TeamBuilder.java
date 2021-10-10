@@ -8,6 +8,7 @@ import fr.milekat.discordbot.bot.events.managers.EventManager;
 import fr.milekat.discordbot.bot.events.managers.TeamManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
+import fr.milekat.utils.DateMileKat;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -22,12 +23,12 @@ import net.dv8tion.jda.api.interactions.components.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TeamBuilder extends ListenerAdapter {
+    private final HashMap<Long, Date> requestCD = new HashMap<>();
+
     public TeamBuilder() {
         BotUtils.getGuild().upsertCommand(BotUtils.getCommandWithSub("teamBuilder.command").setDefaultEnabled(false)
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
@@ -45,7 +46,7 @@ public class TeamBuilder extends ListenerAdapter {
         if (event.getTextChannel().getName().equalsIgnoreCase(BotUtils.getMsg("teamBuilder.teamChannelName"))) {
             //  If yes, you can only create a team in team-builder channel
             if (!event.getSubcommandName().equalsIgnoreCase("creer")) {
-                event.reply(BotUtils.getMsg("teamBuilder.wrongChannel")).setEphemeral(true).queue();
+                BotUtils.reply(event, "teamBuilder.wrongChannel");
                 return;
             }
             //  Get Event and user Profile
@@ -83,18 +84,18 @@ public class TeamBuilder extends ListenerAdapter {
         } else {
             //  else, you are in team category (Normally)
             if (event.getSubcommandName().equalsIgnoreCase("creer")) {
-                event.reply(BotUtils.getMsg("teamBuilder.wrongChannel")).setEphemeral(true).queue();
+                BotUtils.reply(event, "teamBuilder.wrongChannel");
                 return;
             }
             //  Get Event and then team from category if exists, if not send wrongChannel
             Event mcEvent = EventManager.getEventCtTeam(event.getTextChannel().getParent().getIdLong());
             if (mcEvent==null) {
-                event.reply(BotUtils.getMsg("teamBuilder.wrongChannel")).setEphemeral(true).queue();
+                BotUtils.reply(event, "teamBuilder.wrongChannel");
                 return;
             }
             Team team = TeamManager.getTeam(mcEvent, event.getTextChannel().getIdLong());
             if (team==null) {
-                event.reply(BotUtils.getMsg("teamBuilder.wrongChannel")).setEphemeral(true).queue();
+                BotUtils.reply(event, "teamBuilder.wrongChannel");
                 return;
             }
             //  Profile of user (If user is an admin use profile of the team owner
@@ -102,25 +103,25 @@ public class TeamBuilder extends ListenerAdapter {
             if (profile==null) return;
             if (event.getSubcommandName().equalsIgnoreCase("renommer")) {
                 if (TeamManager.exists(mcEvent, event.getOption("nom").getAsString())) {
-                    event.reply(BotUtils.getMsg("teamBuilder.teamRenameError")).setEphemeral(true).queue();
+                    BotUtils.reply(event, "teamBuilder.teamRenameError");
                     return;
                 }
                 team.setTeamName(event.getOption("nom").getAsString());
                 BotUtils.reply(event, "teamBuilder.teamRename", Collections.singletonMap("<name>", team.getTeamName()));
-                Main.log("[" + event.getMember().getUser().getAsTag() + "] rename team with " + team.getTeamName() + ".");
+                Main.log("[" + event.getUser().getAsTag() + "] rename team with " + team.getTeamName() + ".");
                 team.getChannel().getManager().setName(team.getTeamName()).queue();
                 TeamManager.updateName(team);
             } else if (event.getSubcommandName().equalsIgnoreCase("access")) {
                 team.setAccess(event.getOption("access").getAsBoolean());
                 BotUtils.reply(event, "teamBuilder.teamAccess",
                         Collections.singletonMap("<access>", String.valueOf(team.isOpen())));
-                Main.log("[" + event.getMember().getUser().getAsTag() + "] set access to " + team.isOpen() + ".");
+                Main.log("[" + event.getUser().getAsTag() + "] set access to " + team.isOpen() + ".");
                 TeamManager.updateAccess(team);
             } else if (event.getSubcommandName().equalsIgnoreCase("description")) {
                 team.setDescription(event.getOption("description").getAsString());
                 BotUtils.reply(event, "teamBuilder.teamDescription",
                         Collections.singletonMap("<description>", team.getDescription()));
-                Main.log("[" + event.getMember().getUser().getAsTag() + "] update description: " + team.getDescription() + ".");
+                Main.log("[" + event.getUser().getAsTag() + "] update description: " + team.getDescription() + ".");
                 TeamManager.updateDescription(team);
             }
             updatePresentation(team);
@@ -133,13 +134,26 @@ public class TeamBuilder extends ListenerAdapter {
      */
     @Override
     public void onButtonClick(@Nonnull ButtonClickEvent event) {
+        if (event.getTextChannel().getParent()==null) return;
         if (event.getTextChannel().getName().equalsIgnoreCase(BotUtils.getMsg("teamBuilder.teamChannelName"))) {
+            if (requestCD.containsKey(event.getUser().getIdLong()) &&
+                    requestCD.get(event.getUser().getIdLong()).before(new Date(new Date().getTime() + 300000))) {
+                event.reply("Please don't spam, wait " + DateMileKat.reamingToString(
+                        new Date(requestCD.get(event.getUser().getIdLong()).getTime() + 300000)
+                )).setEphemeral(true).queue();
+                return;
+            }
             Event mcEvent = EventManager.getEventCtMain(event.getTextChannel().getParent().getIdLong());
-            Team team = TeamManager.getTeam(mcEvent, event.getMessage().getEmbeds().get(0).getAuthor().getName());
+            Team team = TeamManager.getTeamByMsg(mcEvent, event.getMessage().getIdLong());
+            if (team==null) {
+                event.reply("Error with this team").setEphemeral(true).queue();
+                return;
+            }
             team.getChannel().sendMessage(BotUtils.getMsg("teamBuilder.playerRequest")
-                            .replaceAll("<MENTION>", event.getMember().getAsMention()))
+                            .replaceAll("<MENTION>", event.getUser().getAsMention()))
                     .setActionRow(Button.primary("yes", "Accept"), Button.danger("no", "Decline")).queue();
-            event.reply(BotUtils.getMsg("teamBuilder.requestSent")).setEphemeral(true).queue();
+            BotUtils.reply(event, "teamBuilder.requestSent");
+            requestCD.put(event.getUser().getIdLong(), new Date());
         } else {
             Event mcEvent = EventManager.getEventCtTeam(event.getTextChannel().getParent().getIdLong());
             if (mcEvent==null) return;

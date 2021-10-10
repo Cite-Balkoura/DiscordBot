@@ -3,11 +3,14 @@ package fr.milekat.discordbot.core;
 import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.BotUtils;
 import fr.milekat.discordbot.bot.events.classes.Event;
+import fr.milekat.discordbot.bot.events.classes.Team;
 import fr.milekat.discordbot.bot.events.managers.EventManager;
+import fr.milekat.discordbot.bot.events.managers.TeamManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.discordbot.bot.master.moderation.ModerationUtils;
 import net.dv8tion.jda.api.entities.Category;
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 
 import java.util.UUID;
@@ -27,7 +30,7 @@ public class RabbitMQReceive {
         unmute,
         ban,
         unban,
-        chatEvent,
+        chatGlobal,
         chatTeam,
         other
     }
@@ -48,7 +51,7 @@ public class RabbitMQReceive {
                     }
                 });
             }
-            case chatEvent -> {
+            case chatGlobal -> {
                 Event mcEvent = EventManager.getEvent((String) payload.get("event"));
                 Category category = BotUtils.getGuild().getCategoryById(mcEvent.getCategoryId());
                 if (category==null) {
@@ -60,7 +63,9 @@ public class RabbitMQReceive {
                         .forEach(textChannel -> textChannel.sendMessage((String) payload.get("message")).queue());
             }
             case chatTeam -> {
-                // TODO: 08/10/2021 Do it
+                Event mcEvent = EventManager.getEvent((String) payload.get("event"));
+                Team team = TeamManager.getTeam(mcEvent, new ObjectId((String) payload.get("teamId")));
+                team.getChannel().sendMessage((String) payload.get("message")).queue();
             }
         }
     }

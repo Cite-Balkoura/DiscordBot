@@ -6,17 +6,17 @@ import fr.milekat.discordbot.Main;
 import fr.milekat.discordbot.bot.events.classes.Event;
 import fr.milekat.discordbot.bot.events.classes.Team;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
+import org.bson.types.ObjectId;
 
 import java.util.Collections;
 
 public class TeamManager {
     /**
-     * Get a Team by his name in event
+     * Get a Team from a member
      */
-    public static Team getTeam(Event event, String teamName) {
+    public static Team getTeam(Event event, ObjectId id) {
         return Main.getDatastore(event.getDatabase()).find(Team.class)
-                .filter(Filters.eq("eventName", event.getName()))
-                .filter(Filters.eq("teamName", teamName))
+                .filter(Filters.eq("_id", id))
                 .first();
     }
 
@@ -31,12 +31,22 @@ public class TeamManager {
     }
 
     /**
-     * Get a Team by his name in event
+     * Get a Team by his private channelId
      */
     public static Team getTeam(Event event, long channelId) {
         return Main.getDatastore(event.getDatabase()).find(Team.class)
                 .filter(Filters.eq("eventName", event.getName()))
                 .filter(Filters.eq("channelId", channelId))
+                .first();
+    }
+
+    /**
+     * Get a Team by his presentation message
+     */
+    public static Team getTeamByMsg(Event event, long messageId) {
+        return Main.getDatastore(event.getDatabase()).find(Team.class)
+                .filter(Filters.eq("eventName", event.getName()))
+                .filter(Filters.eq("messageId", messageId))
                 .first();
     }
 
@@ -67,7 +77,7 @@ public class TeamManager {
         Main.getDatastore(team.getEvent().getDatabase()).find(Team.class)
                 .filter(Filters.eq("_id", team.getId()))
                 .update(UpdateOperators.set("teamName", team.getTeamName()))
-                .execute();;
+                .execute();
     }
 
     /**
@@ -77,7 +87,7 @@ public class TeamManager {
         Main.getDatastore(team.getEvent().getDatabase()).find(Team.class)
                 .filter(Filters.eq("_id", team.getId()))
                 .update(UpdateOperators.set("messageId", team.getMessageId()))
-                .execute();;
+                .execute();
     }
 
     /**
@@ -87,7 +97,7 @@ public class TeamManager {
         Main.getDatastore(team.getEvent().getDatabase()).find(Team.class)
                 .filter(Filters.eq("_id", team.getId()))
                 .update(UpdateOperators.set("channelId", team.getChannelId()))
-                .execute();;
+                .execute();
     }
 
     /**

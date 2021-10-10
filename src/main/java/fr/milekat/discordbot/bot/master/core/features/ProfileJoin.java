@@ -14,8 +14,9 @@ import fr.milekat.utils.Tools;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class ProfileJoin extends ListenerAdapter {
@@ -51,12 +52,14 @@ public class ProfileJoin extends ListenerAdapter {
             /* else, greet him with a random message, and if is name is not AlphaNumericExtended, set him a default nickname */
             if (!Tools.isAlphaNumericExtended(event.getUser().getName()) &&
                     BotUtils.getGuild().getSelfMember().canInteract(event.getMember())) {
-                JSONArray renameArray = BotUtils.getNodeArray(Config.getConfig(), "discord.msg.joinGuild.renameList");
+                ArrayList<JSONObject> renameArray = BotUtils.getNodeArray(Config.getConfig(),
+                        "discord.msg.joinGuild.renameList");
                 String renameName = renameArray.get(new Random().nextInt(renameArray.size())).toString();
                 BotUtils.getGuild().modifyNickname(event.getMember(),
                         renameName + "#" + event.getUser().getDiscriminator()).queue();
             }
-            JSONArray greetingArray = BotUtils.getNodeArray(Config.getConfig(), "discord.msg.joinGuild.greetings");
+            ArrayList<JSONObject> greetingArray = BotUtils.getNodeArray(Config.getConfig(),
+                    "discord.msg.joinGuild.greetings");
             String joinMsg = greetingArray.get(new Random().nextInt(greetingArray.size())).toString();
             BotUtils.getChannel("cGeneral")
                     .sendMessage(joinMsg.replaceAll("<name>", event.getMember().getAsMention()))

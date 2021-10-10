@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class BotUtils {
@@ -128,14 +129,18 @@ public class BotUtils {
     /**
      * Return the array of node
      */
-    public static JSONArray getNodeArray(JSONObject objectFile, String path) {
+    public static ArrayList<JSONObject> getNodeArray(JSONObject objectFile, String path) {
         JSONObject jsonObject = objectFile;
+        JSONArray outputArray;
         if (path.contains(".")) {
             for (String node : path.substring(0, path.lastIndexOf('.')).split("\\.")) {
                 jsonObject = (JSONObject) jsonObject.get(node);
             }
-            return (JSONArray) jsonObject.get(path.substring(path.lastIndexOf('.') + 1));
-        } else return (JSONArray) objectFile.get(path);
+            outputArray = (JSONArray) jsonObject.get(path.substring(path.lastIndexOf('.') + 1));
+        } else outputArray = (JSONArray) objectFile.get(path);
+        ArrayList<JSONObject> outputList = new ArrayList<>();
+        if (outputArray != null) for (Object o : outputArray) outputList.add((JSONObject) o);
+        return outputList;
     }
 
     /**
@@ -143,12 +148,12 @@ public class BotUtils {
      */
     public static CommandData getCommand(String baseNode) {
         CommandData command = new CommandData(getMsg(baseNode + ".name"), getMsg(baseNode + ".desc"));
-            getNodeArray(Config.getConfig(), "discord.msg." + baseNode + ".args").forEach(jsonArg ->
-                    command.addOption(OptionType.valueOf(getNodeValue((JSONObject) jsonArg, "type")),
-                            getNodeValue((JSONObject) jsonArg, "argument"),
-                            getNodeValue((JSONObject) jsonArg, "desc"),
-                            Boolean.parseBoolean(getNodeValue((JSONObject) jsonArg, "required")))
-            );
+        getNodeArray(Config.getConfig(), "discord.msg." + baseNode + ".args").forEach(jsonArg ->
+                command.addOption(OptionType.valueOf(getNodeValue(jsonArg, "type")),
+                        getNodeValue(jsonArg, "argument"),
+                        getNodeValue(jsonArg, "desc"),
+                        Boolean.parseBoolean(getNodeValue(jsonArg, "required")))
+        );
         return command;
     }
 
@@ -158,13 +163,12 @@ public class BotUtils {
     public static CommandData getCommandWithSub(String baseNode) {
         CommandData command = new CommandData(getMsg(baseNode + ".name"), getMsg(baseNode + ".desc"));
         getNodeArray(Config.getConfig(), "discord.msg." + baseNode + ".subs").forEach(jsonCmd -> {
-            SubcommandData sub = new SubcommandData(getNodeValue((JSONObject) jsonCmd, "argument"),
-                    getNodeValue((JSONObject) jsonCmd, "desc"));
-            getNodeArray((JSONObject) jsonCmd, "args").forEach(jsonArg ->
-                    sub.addOption(OptionType.valueOf(getNodeValue((JSONObject) jsonArg, "type")),
-                            getNodeValue((JSONObject) jsonArg, "argument"),
-                            getNodeValue((JSONObject) jsonArg, "desc"),
-                            Boolean.parseBoolean(getNodeValue((JSONObject) jsonArg, "required")))
+            SubcommandData sub = new SubcommandData(getNodeValue(jsonCmd, "argument"), getNodeValue(jsonCmd, "desc"));
+            getNodeArray(jsonCmd, "args").forEach(jsonArg ->
+                    sub.addOption(OptionType.valueOf(getNodeValue(jsonArg, "type")),
+                            getNodeValue(jsonArg, "argument"),
+                            getNodeValue(jsonArg, "desc"),
+                            Boolean.parseBoolean(getNodeValue(jsonArg, "required")))
             );
             command.addSubcommands(sub);
         });
