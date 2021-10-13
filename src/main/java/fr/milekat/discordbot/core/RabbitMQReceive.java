@@ -27,9 +27,9 @@ public class RabbitMQReceive {
 
     public enum MessageType {
         mute,
-        unmute,
+        unMute,
         ban,
-        unban,
+        unBan,
         chatGlobal,
         chatTeam,
         other
@@ -37,7 +37,7 @@ public class RabbitMQReceive {
 
     private void process() {
         switch (type) {
-            case ban, unban, mute, unmute -> {
+            case ban, unBan, mute, unMute -> {
                 Profile target = ProfileManager.getProfile(UUID.fromString((String) payload.get("target")));
                 Profile sender = ProfileManager.getProfile(UUID.fromString((String) payload.get("sender")));
                 Long delay = (Long) payload.get("delay");
@@ -45,9 +45,9 @@ public class RabbitMQReceive {
                 BotUtils.getGuild().retrieveMemberById(target.getDiscordId()).queue(member -> {
                     switch (type) {
                         case ban -> ModerationUtils.ban(member, target, sender, delay, reason);
-                        case unban -> ModerationUtils.unBan(member, target, reason);
+                        case unBan -> ModerationUtils.unBan(member, target, reason);
                         case mute -> ModerationUtils.mute(member, target, sender, delay, reason);
-                        case unmute -> ModerationUtils.unMute(member, target, reason);
+                        case unMute -> ModerationUtils.unMute(member, target, reason);
                     }
                 });
             }

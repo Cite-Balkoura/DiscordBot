@@ -76,19 +76,7 @@ public class ModerationUtils {
      */
     public static void muteSend(Member targetMember, Profile target, Profile sender, Long delay, String reason) {
         mute(targetMember, target, sender, delay, reason);
-        try {
-            RabbitMQ.rabbitSend(String.format("""
-                        {
-                            "type": "mute",
-                            "target": "%s",
-                            "sender": "%s",
-                            "delay": %s,
-                            "reason": "%s"
-                        }""", target.getUuid(), sender.getUuid(), delay, reason));
-        } catch (IOException | TimeoutException exception) {
-            Main.log("[Error] RabbitSend - mute");
-            if (Main.DEBUG_ERRORS) exception.printStackTrace();
-        }
+        rabbitSend("mute", target.getUuid().toString(), sender.getUuid().toString(), String.valueOf(delay), reason);
     }
 
     /**
@@ -110,17 +98,7 @@ public class ModerationUtils {
      */
     public static void unMuteSend(Member targetMember, Profile target, String reason) {
         unMute(targetMember, target, reason);
-        try {
-            RabbitMQ.rabbitSend(String.format("""
-                        {
-                            "type": "unmute",
-                            "target": "%s",
-                            "reason": "%s"
-                        }""", target.getUuid(), reason));
-        } catch (IOException | TimeoutException exception) {
-            Main.log("[Error] RabbitSend - unmute");
-            if (Main.DEBUG_ERRORS) exception.printStackTrace();
-        }
+        rabbitSend("unMute", target.getUuid().toString(), null, null, reason);
     }
 
     /**
@@ -157,19 +135,7 @@ public class ModerationUtils {
      */
     public static void banSend(Member targetMember, Profile target, Profile sender, Long delay, String reason) {
         ban(targetMember, target, sender, delay, reason);
-        try {
-            RabbitMQ.rabbitSend(String.format("""
-                        {
-                            "type": "ban",
-                            "target": "%s",
-                            "sender": "%s",
-                            "delay": %s,
-                            "reason": "%s"
-                        }""", target.getUuid(), sender.getUuid(), delay, reason));
-        } catch (IOException | TimeoutException exception) {
-            Main.log("[Error] RabbitSend - ban");
-            if (Main.DEBUG_ERRORS) exception.printStackTrace();
-        }
+        rabbitSend("ban", target.getUuid().toString(), sender.getUuid().toString(), String.valueOf(delay), reason);
     }
 
     /**
@@ -194,17 +160,7 @@ public class ModerationUtils {
      */
     public static void unBanSend(Member targetMember, Profile target, String reason) {
         unBan(targetMember, target, reason);
-        try {
-            RabbitMQ.rabbitSend(String.format("""
-                        {
-                            "type": "unban",
-                            "target": "%s",
-                            "reason": "%s"
-                        }""", target.getUuid(), reason));
-        } catch (IOException | TimeoutException exception) {
-            Main.log("[Error] RabbitSend - unban");
-            if (Main.DEBUG_ERRORS) exception.printStackTrace();
-        }
+        rabbitSend("unBan", target.getUuid().toString(), null, null, reason);
     }
 
     /**
@@ -243,5 +199,19 @@ public class ModerationUtils {
         ban.getChannel().delete().queue();
         BotUtils.getGuild().addRoleToMember(member, BotUtils.getRole("rProfile")).queue();
         BotUtils.getGuild().removeRoleFromMember(member, BotUtils.getRole("rBan")).queue();
+    }
+
+    /**
+     * Send a  message through RabbitMq
+     */
+    private static void rabbitSend(String type, String target, String sender, String delay, String reason) {
+        try {
+            RabbitMQ.rabbitSend(String.format(
+                    "{\"type\":\"%s\",\"target\":\"%s\",\"sender\":\"%s\",\"delay\":\"%s\",\"reason\": \"%s\"}",
+                    type, target, sender, delay, reason));
+        } catch (IOException | TimeoutException exception) {
+            Main.log(String.format("[Error] RabbitSend - %s", type));
+            if (Main.DEBUG_ERRORS) exception.printStackTrace();
+        }
     }
 }
