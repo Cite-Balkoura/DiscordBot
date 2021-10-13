@@ -18,7 +18,6 @@ import java.util.concurrent.TimeoutException;
 public class RabbitMQ {
     private static final JSONObject RABBIT_CONFIG = (JSONObject) ((JSONObject) Config.getConfig().get("data")).get("rabbitMQ");
     private static final JSONObject CONSUMER = (JSONObject) RABBIT_CONFIG.get("consumer");
-    private static final JSONObject PUBLISHER = (JSONObject) RABBIT_CONFIG.get("publisher");
 
     public RabbitMQ() {
         try {
@@ -29,11 +28,6 @@ public class RabbitMQ {
             channel.queueBind((String) CONSUMER.get("queue"),
                     (String) RABBIT_CONFIG.get("exchange"),
                     (String) CONSUMER.get("routingKey"));
-            channel.queueDeclare((String) PUBLISHER.get("queue"),
-                    false, false, false, null);
-            channel.queueBind((String) PUBLISHER.get("queue"),
-                    (String) RABBIT_CONFIG.get("exchange"),
-                    (String) PUBLISHER.get("routingKey"));
             channel.close();
             getConnection().close();
         } catch (IOException | TimeoutException exception) {
@@ -86,11 +80,11 @@ public class RabbitMQ {
     }
 
     /**
-     * Send message through RABBIT_CONFIG.get("routingKey") queue
+     * Send message through prod.bungee.%eventName OR "all"% queue
      */
-    public static void rabbitSend(String message) throws IOException, TimeoutException {
+    public static void rabbitSend(String eventName, String message) throws IOException, TimeoutException {
         Channel channel = getConnection().createChannel();
-        channel.basicPublish((String) RABBIT_CONFIG.get("exchange"), (String) PUBLISHER.get("routingKey"), null,
+        channel.basicPublish((String) RABBIT_CONFIG.get("exchange"), "prod.bungee." + eventName, null,
                 message.getBytes(StandardCharsets.UTF_8));
         channel.close();
         getConnection().close();

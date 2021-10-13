@@ -36,11 +36,11 @@ public class Main {
         init.getConsole().start();
         //  Load Mongo
         datastoreMap = MongoDB.getDatastoreMap();
-        //  Load RabbitMQ
-        new RabbitMQ().getRabbitConsumer().start();
         //  Discord bot load
         JDA = init.getJDA();
         new BotManager();
+        //  Load RabbitMQ
+        new RabbitMQ().getRabbitConsumer().start();
         //  Log
         if (DEBUG_ERRORS) log("Debugs enable");
         if (MODE_DEV) log("Mode dev enable");

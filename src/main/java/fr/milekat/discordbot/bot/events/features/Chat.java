@@ -46,8 +46,8 @@ public class Chat extends ListenerAdapter {
      */
     private void rabbitSend(String type, Event mcEvent, UUID uuid, ObjectId teamId, String message) {
         try {
-            RabbitMQ.rabbitSend(String.format(
-                    "{\"type\":\"%s\",\"event\":\"%s\",\"uuid\":\"%s\",\"teamId\":\"%s\",\"message\": \"%s\"}",
+            RabbitMQ.rabbitSend(mcEvent.getDatabase(),
+                    String.format("{\"type\":\"%s\",\"event\":\"%s\",\"uuid\":\"%s\",\"teamId\":\"%s\",\"message\": \"%s\"}",
                     type, mcEvent.getName(), uuid.toString(), teamId.toString(), message));
         } catch (IOException | TimeoutException exception) {
             Main.log("[Error] RabbitSend - " + type);

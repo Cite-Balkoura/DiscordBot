@@ -206,7 +206,7 @@ public class ModerationUtils {
      */
     private static void rabbitSend(String type, String target, String sender, String delay, String reason) {
         try {
-            RabbitMQ.rabbitSend(String.format(
+            RabbitMQ.rabbitSend("all" , String.format(
                     "{\"type\":\"%s\",\"target\":\"%s\",\"sender\":\"%s\",\"delay\":\"%s\",\"reason\": \"%s\"}",
                     type, target, sender, delay, reason));
         } catch (IOException | TimeoutException exception) {
