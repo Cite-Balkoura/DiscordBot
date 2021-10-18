@@ -4,10 +4,17 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
-mainClassName = 'fr.milekat.discordbot.Main'
+jar {//  Task to build your code jar file without any libs
+    manifest {
+        attributes["Main-Class"] = 'fr.milekat.discordbot.Main'//  Needed to indicate the Main class
+        attributes["Class-Path"] = './DiscordBot-Libs.jar'//  Define path for your dependencies
+    }
+}
 
-shadowJar{
-    getArchiveClassifier().set(null)
+shadowJar {//  Task to build your dependencies jar files
+    exclude("fr/milekat/discordbot")//  Remove code packages from libs file
+    setMainClassName('none')//  Do nothing but needed by shadowJar..
+    getArchiveClassifier().set("Libs")//  CClassifier to add to your project jar file YourProject-Libs.jar
     minimize()
 }
 
@@ -22,7 +29,7 @@ compileJava.options.encoding = 'UTF-8'
 dependencies {
     implementation group: 'com.github.tutur1004', name: 'MilekatUtils', version: '879026bfd2'
     implementation (group: 'net.dv8tion', name:'JDA', version:'4.3.0_334') { exclude module: "opus-java" }
-    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.8'
     implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.3.2'
     implementation group: 'dev.morphia.morphia', name: 'morphia-core', version: '2.2.1'
     implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.13.1'

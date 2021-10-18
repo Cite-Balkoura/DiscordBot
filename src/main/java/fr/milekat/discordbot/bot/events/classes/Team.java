@@ -14,7 +14,7 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.UUID;
 
-@Entity("team")
+@Entity(value = "team")
 public class Team {
     @Id
     private ObjectId id;

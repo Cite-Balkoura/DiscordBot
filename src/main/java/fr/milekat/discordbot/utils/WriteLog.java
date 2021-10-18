@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class WriteLog {
-
     public WriteLog() throws IOException {
         File file = new File("logs.txt");
         if (!file.createNewFile()) {

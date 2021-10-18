@@ -2,7 +2,7 @@ package fr.milekat.discordbot;
 
 import dev.morphia.Datastore;
 import fr.milekat.discordbot.bot.BotManager;
-import fr.milekat.discordbot.core.Init;
+import fr.milekat.discordbot.core.AppSetup;
 import fr.milekat.discordbot.core.MongoDB;
 import fr.milekat.discordbot.core.RabbitMQ;
 import fr.milekat.discordbot.utils.WriteLog;
@@ -31,13 +31,13 @@ public class Main {
         System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "warn");
         logs = new WriteLog();
         log("Starting application..");
-        Init init = new Init();
+        AppSetup setup = new AppSetup();
         //  Console load
-        init.getConsole().start();
+        setup.getConsole().start();
         //  Load Mongo
         datastoreMap = MongoDB.getDatastoreMap();
         //  Discord bot load
-        JDA = init.getJDA();
+        JDA = setup.getJDA();
         new BotManager();
         //  Load RabbitMQ
         new RabbitMQ().getRabbitConsumer().start();

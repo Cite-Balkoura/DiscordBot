@@ -13,8 +13,8 @@ import org.json.simple.parser.ParseException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 
-public class Init {
-    public Init() throws IOException, ParseException {
+public class AppSetup {
+    public AppSetup() throws IOException, ParseException {
         Config.loadConfig();
     }
 
