@@ -70,6 +70,7 @@
         "hasTeam": "You can join/build a team in <CHANNEL>"
       },
       "profileReg": {
+        "registrationMessage": "Registration are open !",
         "slashRegister": "Register form manage command",
         "slashOptAction" : "Select an action",
         "slashOptStepName": "Select a step to set",

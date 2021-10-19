@@ -57,6 +57,11 @@ public class ProfileRegister extends ListenerAdapter {
         ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
                 new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
         ).queue());
+        BotUtils.getGuild().upsertCommand(
+                new CommandData("open-reg", "Open registrations").setDefaultEnabled(false)
+        ).queue(command -> BotUtils.getGuild().updateCommandPrivilegesById(command.getIdLong(),
+                new CommandPrivilege(CommandPrivilege.Type.ROLE, true, BotUtils.getRole("rAdmin").getIdLong())
+        ).queue());
     }
 
     /**
@@ -65,23 +70,33 @@ public class ProfileRegister extends ListenerAdapter {
     @Override
     public void onSlashCommand(@Nonnull SlashCommandEvent event) {
         if (event.getUser().isBot() || !event.getGuild().equals(BotUtils.getGuild())) return;
-        if (!event.getName().equalsIgnoreCase("register")) return;
-        if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
-            event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
-            return;
+        if (event.getName().equalsIgnoreCase("register")) {
+            if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
+                event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
+                return;
+            }
+            if (!RegistrationManager.isRegistration(event.getChannel().getIdLong())) {
+                event.reply("Bad channel").setEphemeral(true).queue();
+                return;
+            }
+            Registration registration = RegistrationManager.getRegistrationByChannel(event.getTextChannel().getIdLong());
+            if (event.getOption("action") != null && event.getOption("name") != null &&
+                    event.getOption("action").getAsString().equalsIgnoreCase("set-step")) {
+                registration.setStep(event.getOption("name").getAsString());
+                RegistrationManager.save(registration);
+                BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(member -> formStepSend(member, registration));
+            }
+            event.reply("Done !").setEphemeral(true).queue();
+        } else if (event.getName().equalsIgnoreCase("open-reg")) {
+            if (!event.getMember().getRoles().contains(BotUtils.getRole("rAdmin"))) {
+                event.reply(BotUtils.getMsg("noPerm")).setEphemeral(true).queue();
+                return;
+            }
+            BotUtils.getChannel("cRegister").sendMessage(BotUtils.getMsg("profileReg.registrationMessage"))
+                    .setActionRow(Button.success("register", BotUtils.getMsg("profileReg.buttonFrom"))
+                            .withEmoji(Emoji.fromUnicode("\uD83D\uDCDD"))).queue();
+            event.reply(BotUtils.getChannel("cRegister").getAsMention()).setEphemeral(true).queue();
         }
-        if (!RegistrationManager.isRegistration(event.getChannel().getIdLong())) {
-            event.reply("Bad channel").setEphemeral(true).queue();
-            return;
-        }
-        Registration registration = RegistrationManager.getRegistrationByChannel(event.getTextChannel().getIdLong());
-        if (event.getOption("action")!=null && event.getOption("name")!=null &&
-                event.getOption("action").getAsString().equalsIgnoreCase("set-step")) {
-            registration.setStep(event.getOption("name").getAsString());
-            RegistrationManager.save(registration);
-            BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(member -> formStepSend(member, registration));
-        }
-        event.reply("Done !").setEphemeral(true).queue();
     }
 
     /**
@@ -96,11 +111,7 @@ public class ProfileRegister extends ListenerAdapter {
             //  TEXT step update
             formStepReceive(event.getMessage(), event.getMember(),
                     RegistrationManager.getRegistration(event.getMember().getIdLong()), null, null, null);
-            return;
         }
-        if (event.getAuthor().isBot() || !event.getChannel().equals(BotUtils.getChannel("cRegister"))) return;
-        event.getChannel().sendMessage(event.getMessage().getContentRaw()).setActionRow(Button.success(event.getAuthor().getName(), BotUtils.getMsg("profileReg.buttonFrom")).withEmoji(Emoji.fromUnicode("\uD83D\uDCDD"))).queue();
-        event.getMessage().delete().queue();
     }
 
     /**
@@ -217,7 +228,8 @@ public class ProfileRegister extends ListenerAdapter {
     /**
      * Execute actions for the current step of user
      */
-    private void formStepReceive(Message message, Member member, Registration registration, Button button, SelectionMenuInteraction selection, GenericComponentInteractionCreateEvent event) {
+    private void formStepReceive(Message message, Member member, Registration registration, Button button,
+                                 SelectionMenuInteraction selection, GenericComponentInteractionCreateEvent event) {
         if (registration == null) {
             if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Player null");
             if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
@@ -331,7 +343,8 @@ public class ProfileRegister extends ListenerAdapter {
         Registration registration = RegistrationManager.getRegistrationByForm(message.getIdLong());
         registration.addVote(member.getIdLong(), button.getId().equalsIgnoreCase("yes"));
         EmbedBuilder embedBuilder = getFinalEmbed(registration, BotUtils.getMsg("profileReg.staffNewForm"));
-        embedBuilder.addField(BotUtils.getMsg("profileReg.votesYes") + " (" + registration.getVotes().values().stream().filter(Boolean::booleanValue).count() + ")",
+        embedBuilder.addField(BotUtils.getMsg("profileReg.votesYes") + " (" +
+                        registration.getVotes().values().stream().filter(Boolean::booleanValue).count() + ")",
                 registration.getVotes()
                         .entrySet()
                         .stream()
@@ -339,7 +352,8 @@ public class ProfileRegister extends ListenerAdapter {
                         .map(longBooleanEntry -> Main.getJDA().retrieveUserById(longBooleanEntry.getKey()).complete().getName())
                         .collect(Collectors.joining("\n")),
                 true);
-        embedBuilder.addField(BotUtils.getMsg("profileReg.votesNo") + " (" + registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() + ")",
+        embedBuilder.addField(BotUtils.getMsg("profileReg.votesNo") + " (" +
+                        registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() + ")",
                 registration.getVotes()
                         .entrySet()
                         .stream()
@@ -362,7 +376,8 @@ public class ProfileRegister extends ListenerAdapter {
                 });
                 registration.setStep("DONE");
                 RegistrationManager.save(registration);
-                ProfileManager.create(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(), new Date(), registration.getInputs(), new ArrayList<>()));
+                ProfileManager.create(new Profile(registration.getUsername(), registration.getUuid(), registration.getDiscordId(),
+                        new Date(), registration.getInputs(), new ArrayList<>()));
                 BotUtils.getChannel("cValidated").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();
                 if (Main.DEBUG_ERRORS) Main.log("[" + registration.getUsername() + "] Register validated");
