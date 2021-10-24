@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -187,8 +186,7 @@ public class ModerationUtils {
         ban.getChannel().sendMessage(BotUtils.getMsg("ban.unBanNotify")
                         .replaceAll("<mention>", member.getAsMention())
                 .replaceAll("<reason>", ban.getReasonPardon()))
-                .setActionRow(Button.success(banAcknowledge, BotUtils.getMsg("ban.buttonAcknowledge"))
-                        .withStyle(ButtonStyle.PRIMARY))
+                .setActionRow(Button.primary(banAcknowledge, BotUtils.getMsg("ban.buttonAcknowledge")))
                 .queue();
     }
 

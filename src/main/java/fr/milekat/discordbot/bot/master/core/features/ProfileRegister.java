@@ -27,7 +27,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenuInteraction;
@@ -236,7 +235,8 @@ public class ProfileRegister extends ListenerAdapter {
             return;
         }
         if (registration.getDiscordId() != member.getIdLong()) {
-            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Id : " + registration.getDiscordId() + " / " + member.getIdLong());
+            if (Main.DEBUG_ERRORS) Main.log("[" + member.getUser().getAsTag() + "] Id : " +
+                    registration.getDiscordId() + " / " + member.getIdLong());
             if (event!=null) event.reply("Error").queue(interactionHook -> interactionHook.deleteOriginal().queue());
             return;
         }
@@ -305,8 +305,8 @@ public class ProfileRegister extends ListenerAdapter {
                     if (button.getId().equalsIgnoreCase("yes")) {
                         BotUtils.getChannel("cStaffValidation")
                                 .sendMessageEmbeds(getFinalEmbed(registration, BotUtils.getMsg("profileReg.staffNewForm")).build())
-                                .setActionRow(Button.primary("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")).withStyle(ButtonStyle.SUCCESS),
-                                        Button.primary("no", Emoji.fromMarkdown("<a:No:798960407708303403>")).withStyle(ButtonStyle.DANGER))
+                                .setActionRow(Button.success("yes", Emoji.fromMarkdown("<a:Yes:798960396563251221>")),
+                                        Button.danger("no", Emoji.fromMarkdown("<a:No:798960407708303403>")))
                                 .queue(staffEmbed -> {
                                     registration.setFormId(staffEmbed.getIdLong());
                                     registration.setStep("WAITING");
@@ -365,7 +365,7 @@ public class ProfileRegister extends ListenerAdapter {
             if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 3 ||
                     (button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
-                        Button.success("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                        Button.primary("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge"))
                 ).queue();
                 BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
                     BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
@@ -384,7 +384,7 @@ public class ProfileRegister extends ListenerAdapter {
             } else if (registration.getVotes().values().stream().filter(aBoolean -> !aBoolean).count() >= 3 ||
                     (!button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
                 registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userRefused")).setActionRow(
-                        Button.success("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")).withStyle(ButtonStyle.PRIMARY)
+                        Button.primary("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge"))
                 ).queue();
                 BotUtils.getChannel("cRejected").sendMessage(msg).setActionRows().queue();
                 msg.delete().queue();

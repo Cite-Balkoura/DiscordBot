@@ -19,7 +19,6 @@ public class Event {
     private String name;
     @Indexed(options = @IndexOptions(unique = true))
     private String database;
-    private String type;
     private ArrayList<EventFeature> eventFeatures;
     private Date startDate;
     private Date endDate;
@@ -47,10 +46,6 @@ public class Event {
 
     public String getDatabase() {
         return database;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public ArrayList<EventFeature> getEventFeatures() {
