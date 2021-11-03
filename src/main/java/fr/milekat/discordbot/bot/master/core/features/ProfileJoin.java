@@ -53,8 +53,7 @@ public class ProfileJoin extends ListenerAdapter {
             /* else, greet him with a random message, and if is name is not AlphaNumericExtended, set him a default nickname */
             if (!Tools.isAlphaNumericExtended(event.getUser().getName()) &&
                     BotUtils.getGuild().getSelfMember().canInteract(event.getMember())) {
-                ArrayList<JSONObject> renameArray = BotUtils.getNodeArrayList(Config.getConfig(),
-                        "discord.msg.joinGuild.renameList");
+                JSONArray renameArray = BotUtils.getNodeArray(Config.getConfig(), "discord.msg.joinGuild.renameList");
                 String renameName = renameArray.get(new Random().nextInt(renameArray.size())).toString();
                 BotUtils.getGuild().modifyNickname(event.getMember(),
                         renameName + "#" + event.getUser().getDiscriminator()).queue();

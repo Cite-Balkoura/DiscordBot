@@ -84,6 +84,7 @@ public class RabbitMQ {
      */
     public static void rabbitSend(String eventName, String message) throws IOException, TimeoutException {
         Channel channel = getConnection().createChannel();
+        Main.log(eventName + ":" + message);
         channel.basicPublish((String) RABBIT_CONFIG.get("exchange"), "prod.bungee." + eventName, null,
                 message.getBytes(StandardCharsets.UTF_8));
         channel.close();
