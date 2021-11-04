@@ -431,6 +431,9 @@ public class ProfileRegister extends ListenerAdapter {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.red).setDescription(description).setThumbnail(
                 "https://crafatar.com/renders/body/" + registration.getUuid().toString() + "?size=512&overlay&default=MHF_Alex");
+        BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue();
+
+        builder.addField("Discord", "<@" + registration.getDiscordId() + ">", false);
         registration.getInputs().forEach(input -> builder.addField(
                 ":question: " + input.getStep().getName(),
                 ":arrow_right: " + input.getAnswer(),

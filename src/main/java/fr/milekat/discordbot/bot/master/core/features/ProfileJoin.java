@@ -15,9 +15,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class ProfileJoin extends ListenerAdapter {
