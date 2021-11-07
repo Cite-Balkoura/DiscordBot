@@ -51,6 +51,7 @@ public class RabbitMQ {
      * Load RABBIT_CONFIG.get("queue") Consumer
      */
     public Thread getRabbitConsumer() {
+        if (Main.DEBUG_RABBIT) Main.log("Rabbit debugs enable");
         return new Thread(() -> {
             try {
                 Channel channel = getConnection().createChannel();

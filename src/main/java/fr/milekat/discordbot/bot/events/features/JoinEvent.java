@@ -9,7 +9,10 @@ import fr.milekat.discordbot.bot.events.managers.ParticipationManager;
 import fr.milekat.discordbot.bot.master.core.classes.Profile;
 import fr.milekat.discordbot.bot.master.core.managers.ProfileManager;
 import fr.milekat.utils.DateMileKat;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,8 +29,11 @@ public class JoinEvent extends ListenerAdapter {
     @Override
     public void onButtonClick(ButtonClickEvent event) {
         if (!event.getChannel().equals(BotUtils.getChannel("cEvent"))) return;
+        if (event.getUser().isBot() || event.getMember()==null || event.getMessage().getEmbeds().isEmpty()) return;
         if (event.getButton()==null || !event.getButton().getLabel().equalsIgnoreCase(JOIN_EVENT)) return;
-        registerPlayerToEvent(event.getMember(), event.getUser(), event.getMessage());
+        Event mcEvent = EventManager.getEvent(event.getMessage().getEmbeds().get(0).getTitle());
+        if (mcEvent==null) return;
+        registerPlayerToEvent(event.getMember(), mcEvent);
         event.reply("Done !").setEphemeral(true).queue();
     }
 
@@ -47,11 +53,10 @@ public class JoinEvent extends ListenerAdapter {
     /**
      * Register the player to the event (If member is not banned)
      */
-    private void registerPlayerToEvent(Member member, User user, Message message) {
-        if (user.isBot() || message.getEmbeds().isEmpty()) return;
+    public static void registerPlayerToEvent(Member member, Event event) {
         //  Prevent a banned player to register to an event if he is currently banned
         if (member.getRoles().contains(BotUtils.getRole("rBan"))) return;
-        Event event = EventManager.getEvent(message.getEmbeds().get(0).getTitle());
+        //  Check if event has a role
         Role role = BotUtils.getGuild().getRoleById(event.getRoleId());
         if (role==null) {
             Main.log("[ERROR] No role found for event: " + event.getName());
@@ -60,8 +65,8 @@ public class JoinEvent extends ListenerAdapter {
         //  Check if member is already on this Event
         if (member.getRoles().contains(role)) return;
         BotUtils.getGuild().addRoleToMember(member, role).queue();
-        Profile profile = ProfileManager.getProfile(user.getIdLong());
-        if (profile == null) {
+        Profile profile = ProfileManager.getProfile(member.getIdLong());
+        if (profile==null) {
             Main.log("[ERROR] Can't find member profile in Event channel.");
             return;
         }
