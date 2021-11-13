@@ -364,10 +364,11 @@ public class ProfileRegister extends ListenerAdapter {
         message.suppressEmbeds(false).queue(unused -> message.editMessageEmbeds(embedBuilder.build()).queue(msg -> {
             if (registration.getVotes().values().stream().filter(Boolean::booleanValue).count() >= 3 ||
                     (button.getId().equalsIgnoreCase("yes") && Main.MODE_DEV && member.getIdLong()==194050286535442432L)) {
-                registration.getChannel().sendMessage(BotUtils.getMsg("profileReg.userAccepted")).setActionRow(
-                        Button.primary("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge"))
-                ).queue();
                 BotUtils.getGuild().retrieveMemberById(registration.getDiscordId()).queue(target -> {
+                    registration.getChannel().sendMessage(
+                            BotUtils.getMsg("profileReg.userAccepted").replaceAll("<MENTION>", target.getAsMention()))
+                            .setActionRow(Button.primary("regAcknowledge", BotUtils.getMsg("profileReg.buttonAcknowledge")))
+                            .queue();
                     BotUtils.getGuild().addRoleToMember(target, BotUtils.getRole("rProfile")).queue();
                     BotUtils.getGuild().removeRoleFromMember(target, BotUtils.getRole("rWaiting")).queue();
                     if (BotUtils.getGuild().getSelfMember().canInteract(target)) {
