@@ -42,7 +42,7 @@ public class RabbitMQReceive {
             case ban, unBan, mute, unMute -> {
                 Profile target = ProfileManager.getProfile(UUID.fromString((String) payload.get("target")));
                 Profile sender = ProfileManager.getProfile(UUID.fromString((String) payload.get("sender")));
-                Long delay = (Long) payload.get("delay");
+                Long delay = Long.parseLong((String) payload.get("delay"));
                 String reason = (String) payload.get("reason");
                 BotUtils.getGuild().retrieveMemberById(target.getDiscordId()).queue(member -> {
                     switch (type) {

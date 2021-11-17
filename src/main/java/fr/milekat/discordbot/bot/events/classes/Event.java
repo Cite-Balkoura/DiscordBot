@@ -28,7 +28,7 @@ public class Event {
     private long roleId;
     @Indexed(options = @IndexOptions(unique = true))
     private long categoryId;
-    @Indexed(options = @IndexOptions(unique = true))
+    @Indexed(options = @IndexOptions(unique = true, sparse = true))
     private long categoryTeamId;
 
     public enum EventFeature {
