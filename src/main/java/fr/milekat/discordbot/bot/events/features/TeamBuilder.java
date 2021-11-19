@@ -136,13 +136,15 @@ public class TeamBuilder extends ListenerAdapter {
     public void onButtonClick(@Nonnull ButtonClickEvent event) {
         if (event.getTextChannel().getParent()==null) return;
         if (event.getTextChannel().getName().equalsIgnoreCase(BotUtils.getMsg("teamBuilder.teamChannelName"))) {
-            if (requestCD.containsKey(event.getUser().getIdLong()) &&
-                    requestCD.get(event.getUser().getIdLong()).before(new Date(new Date().getTime() + 300000))) {
-                event.reply("Please don't spam, wait " + DateMileKat.reamingToString(
-                        new Date(requestCD.get(event.getUser().getIdLong()).getTime() + 300000)
-                )).setEphemeral(true).queue();
-                return;
+            if (requestCD.containsKey(event.getUser().getIdLong())){
+                Date endCd = new Date(requestCD.get(event.getUser().getIdLong()).getTime() + 300000);
+                if (new Date().before(endCd)) {
+                    event.reply("Please don't spam, wait " + DateMileKat.reamingToString(endCd))
+                            .setEphemeral(true).queue();
+                    return;
+                }
             }
+            requestCD.remove(event.getUser().getIdLong());
             Event mcEvent = EventManager.getEventCtMain(event.getTextChannel().getParent().getIdLong());
             Team team = TeamManager.getTeamByMsg(mcEvent, event.getMessage().getIdLong());
             if (team==null) {
